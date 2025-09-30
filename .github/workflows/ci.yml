@@ -83,46 +83,44 @@ jobs:
           name: test_results
           path: tests/results/*
 
-      - name: Calibrate test files
-        if: ${{ runner.os == 'Linux' && matrix.python-version == '3.13' }}
+  calibrate1:
+    strategy:
+      fail-fast: false
+      matrix:
+        job_num: [0, 1]
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the package & dependencies
         run: |
-          skip_filenames=(
-            "ihmh6"                 # Missing natural gas consumption data
-            "ihmh7"                 # Has PV
-            "house02"               # Missing natural gas consumption data
-            "house05"               # Missing natural gas consumption data
-            "house09"               # Missing natural gas consumption data
-            "house10"               # Missing natural gas consumption data
-            "house22"               # Gap in electricity consumption data
-            "house31"               # Gap in electricity consumption data
-            "house32"               # Electricity consumption covers less than 300 days
-            "house37"               # Electricity consumption covers less than 300 days
-            "house44"               # Missing electricity consumption data
-            "house45"               # Missing electricity consumption data
-            "house46"               # Zeroes in electricity consumption data
-            "house50"               # Billing period shorter than 20 days
-            "house57"               # Natural gas consumption covers less than 300 days
-            "house77"               # Billing period shorter than 20 days
-            "house83"               # Natural gas consumption covers less than 300 days
-            "house85"               # Missing fuel oil consumption data
-            "house86"               # Missing fuel oil consumption data
-          )
-          for xml in test_hpxmls/**/*.xml; do
-            if [[ $xml == *"invalid_homes"* ]]; then
-              continue
-            fi
-            base_xml=$(basename "$xml" .xml)
-            if [[ " ${skip_filenames[*]} " =~ " ${base_xml} " ]]; then
-              continue
-            fi
-            output_dir=tests/all_calibration_results/$base_xml
-            # TODO: Add --save-all-results
-            uv run openstudio-hpxml-calibration calibrate --hpxml-filepath $xml --config-filepath tests/data/test_config_for_ci_calibrations.yaml --output-dir $output_dir --verbose
-          done
+          uv version
+          uv sync
+
+      - name: Install OpenStudio on Linux
+        if: runner.os == 'Linux'
+        run: |
+          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          sudo dpkg -i OpenStudio.deb
+          rm OpenStudio.deb
+
+      - name: Download Weather
+        run: uv run openstudio-hpxml-calibration download-weather
+
+      - name: Run calibrations
+        run: python3 utils/run_ci_simulations.py ${{ matrix.job_num }}
 
       - name: Save calibration results
         uses: actions/upload-artifact@v4
-        if: ${{ runner.os == 'Linux' && matrix.python-version == '3.13' }}
         with:
-          name: calibration_results
+          name: calibration_results${{ matrix.job_num }}
           path: tests/all_calibration_results/*
