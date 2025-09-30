@@ -83,7 +83,7 @@ jobs:
           name: test_results
           path: tests/results/*
 
-  calibrate1:
+  calibrate:
     strategy:
       fail-fast: false
       matrix:
@@ -107,7 +107,6 @@ jobs:
           uv sync
 
       - name: Install OpenStudio on Linux
-        if: runner.os == 'Linux'
         run: |
           wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
           sudo dpkg -i OpenStudio.deb
@@ -122,5 +121,15 @@ jobs:
       - name: Save calibration results
         uses: actions/upload-artifact@v4
         with:
-          name: calibration_results${{ matrix.job_num }}
+          name: calibration_results_${{ matrix.job_num }}
           path: tests/all_calibration_results/*
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: upload
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: calibration_results
+          pattern: calibration_results_*
