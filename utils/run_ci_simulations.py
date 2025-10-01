@@ -11,6 +11,7 @@ if __name__ == "__main__":
 
     SKIP_FILENAMES = (
         "ihmh6.xml",  # Missing natural gas consumption data
+        "ihmh7.xml",  # Has PV
         "house02.xml",  # Missing natural gas consumption data
         "house05.xml",  # Missing natural gas consumption data
         "house09.xml",  # Missing natural gas consumption data
