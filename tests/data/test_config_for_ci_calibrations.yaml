@@ -1,6 +1,6 @@
 genetic_algorithm:
   population_size: 8  # Each CI runner has 4 CPUs, so use a multiple of that
-  generations: 10  # Limit CI usage
+  generations: 5  # Limit CI usage
 
 acceptance_criteria:
   bill_regression_max_cvrmse: 0.81 # Coefficient of Variation of the Root Mean Square Error (CVRMSE) of the regression result
