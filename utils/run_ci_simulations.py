@@ -48,8 +48,8 @@ if __name__ == "__main__":
 
         all_xmls.append(xml)
 
-    # Split simulations across 2 CI jobs
-    num_jobs = 2
+    # Split simulations across 4 CI jobs
+    num_jobs = 4
     num_files = -(-len(all_xmls) // num_jobs)
     job_num = int(sys.argv[1])
     job_xmls = [all_xmls[i : i + num_files] for i in range(0, len(all_xmls), num_files)][job_num]

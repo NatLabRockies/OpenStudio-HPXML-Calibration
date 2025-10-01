@@ -87,16 +87,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        job_num: [0, 1]
+        job_num: [0, 1, 2, 3]
     runs-on: ubuntu-latest
     needs: [test]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.13"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -133,3 +133,4 @@ jobs:
         with:
           name: calibration_results
           pattern: calibration_results_*
+          delete-merged: true
