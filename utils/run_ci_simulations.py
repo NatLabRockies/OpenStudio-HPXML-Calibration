@@ -1,5 +1,4 @@
 import glob
-import os
 import shutil
 import subprocess
 import sys
@@ -43,7 +42,7 @@ if __name__ == "__main__":
         if "invalid_homes" in xml:
             continue
 
-        if os.path.basename(xml) in SKIP_FILENAMES:
+        if Path(xml).name in SKIP_FILENAMES:
             continue
 
         all_xmls.append(xml)
@@ -69,7 +68,7 @@ if __name__ == "__main__":
                 "--output-dir",
                 str(output_dir),
                 "--config-filepath",
-                str(tests_dir / "data" / "test_config_for_ci_calibrations.yaml"),
+                str(tests_dir / "data" / "test_config_no_cvrmse.yaml"),
                 "--num-proc",
                 "8",
                 "--verbose",
