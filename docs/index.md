@@ -24,7 +24,7 @@ Generate an HPXML model of home energy use, calibrated to utility data
 1. Initialize the Calibrate object from this repo
     1. Use it to create an OSW to modify the xml with the changes from calibration: `calibration.osw`
 1. Modify the upgraded xml to match the calibration work: `oshc modify-xml --workflow-file calibration.osw`
-    1. Use the `calibration_results` from the `best_individual` of the final generation of calibration
+    1. Open the `logbook.json` and use the `calibration_results` from the `best_individual` of the final generation of calibration
     1. Remove whatever item(s) is/are being upgraded, since the upgrade overrides the calibration
 1. Calculate energy use from the calibrated upgraded home: `oshc run-sim --hpxml-filepath asdf_upgraded.xml`
 1. Read the energy simulation results from both the upgraded calibrated home and the existing calibrated home
