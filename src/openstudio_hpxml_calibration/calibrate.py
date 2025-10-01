@@ -81,7 +81,7 @@ class Calibrate:
     def get_normalized_consumption_per_bill(self) -> dict[FuelType, pd.DataFrame]:
         """Get the normalized consumption for the building.
 
-        :return: Dictionary containing dataframes for the normalized consumption by end use and fuel type, in mbtu.
+        :return: Dictionary containing dataframes for the normalized consumption by end use and fuel type, in MBtu.
         :rtype: dict[FuelType, pd.DataFrame]
         """
 
@@ -137,7 +137,7 @@ class Calibrate:
 
         :param json_results_path: Path to the JSON file containing annual results from the HPXML model.
         :type json_results_path: Path
-        :return: Model results for each fuel type by end use in mbtu.
+        :return: Model results for each fuel type by end use in MBtu.
         :rtype: dict[str, dict[str, float]]
         """
 
@@ -184,9 +184,9 @@ class Calibrate:
     ) -> dict[str, dict[str, dict[str, float]]]:
         """Compare the normalized consumption with the model results.
 
-        :param normalized_consumption: Normalized consumption data (mbtu).
+        :param normalized_consumption: Normalized consumption data (MBtu).
         :type normalized_consumption: dict[str, pd.DataFrame]
-        :param annual_model_results: Model results data (mbtu).
+        :param annual_model_results: Model results data (MBtu).
         :type annual_model_results: dict
         :return: Comparison results containing bias and absolute errors for each fuel type and end use.
         :rtype: dict[str, dict[str, dict[str, float]]]
@@ -218,8 +218,8 @@ class Calibrate:
 
                     disagg_result = disagg_results[load_type]
                     if model_fuel_type == "electricity":
-                        # All results from simulation and normalized bills are in mbtu.
-                        # convert electric loads from mbtu to kWh for bpi2400
+                        # All results from simulation and normalized bills are in MBtu.
+                        # convert electric loads from MBtu to kWh for bpi2400
                         annual_normalized_bill_consumption[model_fuel_type][load_type] = (
                             convert_units(
                                 annual_normalized_bill_consumption[model_fuel_type][load_type],
