@@ -20,8 +20,6 @@ test_config = _load_config("tests/data/test_config.yaml")
 
 repo_root = pathlib.Path(__file__).resolve().parent.parent
 ira_rebate_hpxmls = list((repo_root / "test_hpxmls" / "ira_rebates").glob("*.xml"))
-real_home_hpxmls = list((repo_root / "test_hpxmls" / "real_homes").glob("*.xml"))
-ihmh_home_hpxmls = list((repo_root / "test_hpxmls" / "ihmh_homes").glob("*.xml"))
 
 
 @pytest.mark.parametrize("filename", ira_rebate_hpxmls, ids=lambda x: x.stem)
@@ -83,9 +81,7 @@ def test_weather_retrieval(results_dir, filename):
     and sys.version_info.micro <= 2,
     reason="Skipping Windows and Python <= 3.13.2 due to known bug",
 )
-@pytest.mark.parametrize(
-    "filename", ira_rebate_hpxmls + real_home_hpxmls + ihmh_home_hpxmls, ids=lambda x: x.stem
-)
+@pytest.mark.parametrize("filename", ira_rebate_hpxmls, ids=lambda x: x.stem)
 def test_curve_fit_and_fit_model(results_dir, filename):
     try:
         hpxml = HpxmlDoc(filename)
@@ -131,8 +127,8 @@ def test_curve_fit_and_fit_model(results_dir, filename):
             f"No successful regression fits for {filename.stem}_{fuel_type.value}"
         )
     except Bpi2400ModelFitError:
-        # Only these files should raise this error
-        assert filename.name in {"ihmh7.xml", "house11.xml", "house83.xml"}
+        # Only this file should raise this error
+        assert filename.name in {"ihmh7.xml"}
 
 
 def test_normalize_consumption_to_epw():

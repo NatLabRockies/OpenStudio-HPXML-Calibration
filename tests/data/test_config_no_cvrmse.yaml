@@ -1,5 +1,5 @@
 genetic_algorithm:
-  population_size: 5
+  population_size: 8  # Each CI runner has 4 CPUs, so use a multiple of that
   generations: 20
 
 acceptance_criteria:
