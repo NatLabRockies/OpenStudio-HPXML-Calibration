@@ -3,7 +3,7 @@
 Generate an HPXML model of home energy use, calibrated to utility data.
 
 !!! note "Nearly everyone will interact solely with the command line interface"
-    Custom workflows can be built using the classes & methods. For advanced users only.
+    Custom workflows can be built using the classes & methods. See the `Code Documentation` section for more information. For advanced users only.
 
 - `openstudio-hpxml-calibration --help`
 - Or the short version: `oshc -h`
