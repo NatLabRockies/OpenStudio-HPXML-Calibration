@@ -68,7 +68,7 @@ if __name__ == "__main__":
                 "--output-dir",
                 str(output_dir),
                 "--config-filepath",
-                str(tests_dir / "data" / "test_config_no_cvrmse.yaml"),
+                str(tests_dir / "data" / "test_config_for_ci_calibrations.yaml"),
                 "--num-proc",
                 "8",
                 "--verbose",
