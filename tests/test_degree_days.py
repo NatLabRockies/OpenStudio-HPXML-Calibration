@@ -6,7 +6,7 @@ from openstudio_hpxml_calibration.hpxml import HpxmlDoc
 
 def test_calc_daily_dbs():
     hpxml = HpxmlDoc(Path("test_hpxmls/ihmh_homes/ihmh4.xml").resolve())
-    daily_dbs = dd.calc_daily_dbs(hpxml)
+    daily_dbs = dd._calc_daily_dbs(hpxml)
     assert daily_dbs.f.iloc[0] == 36.695
     assert daily_dbs.f.iloc[364] == 28.85
     assert daily_dbs.f.iloc[200] == 69.035
@@ -15,16 +15,16 @@ def test_calc_daily_dbs():
 
 def test_calc_degree_days():
     hpxml = HpxmlDoc(Path("test_hpxmls/ihmh_homes/ihmh4.xml").resolve())
-    daily_dbs = dd.calc_daily_dbs(hpxml)
-    hdd = dd.calc_degree_days(daily_dbs.f, base_temp_f=65.0, is_heating=True)
-    cdd = dd.calc_degree_days(daily_dbs.f, base_temp_f=65.0, is_heating=False)
+    daily_dbs = dd._calc_daily_dbs(hpxml)
+    hdd = dd._calc_degree_days(daily_dbs.f, base_temp_f=65.0, is_heating=True)
+    cdd = dd._calc_degree_days(daily_dbs.f, base_temp_f=65.0, is_heating=False)
     assert hdd == 5444.54
     assert cdd == 658.34
 
 
 def test_calc_heat_cool_degree_days():
     hpxml = HpxmlDoc(Path("test_hpxmls/ihmh_homes/ihmh4.xml").resolve())
-    daily_dbs = dd.calc_daily_dbs(hpxml)
-    degree_days = dd.calc_heat_cool_degree_days(daily_dbs.f)
+    daily_dbs = dd._calc_daily_dbs(hpxml)
+    degree_days = dd._calc_heat_cool_degree_days(daily_dbs.f)
     assert degree_days["HDD65F"] == 5444.54
     assert degree_days["CDD65F"] == 658.34

@@ -108,37 +108,37 @@ def test_add_bills(test_data):
         csv_bills_filepath=test_data["sample_bill_csv_path"],
         config_filepath=TEST_CONFIG,
     )
-    assert cal.hpxml.get_consumptions() is not None
-    assert cal.hpxml.get_consumptions()[0] is not None
+    assert cal.hpxml._get_consumptions() is not None
+    assert cal.hpxml._get_consumptions()[0] is not None
     # Confirm that we wrote the building_id correctly
     assert (
-        cal.hpxml.get_consumptions()[0].BuildingID.attrib["idref"]
-        == cal.hpxml.get_first_building_id()
+        cal.hpxml._get_consumptions()[0].BuildingID.attrib["idref"]
+        == cal.hpxml._get_first_building_id()
     )
     # Confirm that we got the right fuel types from the incoming csv file
     raw_bills = pd.read_csv(test_data["sample_bill_csv_path"])
     assert (
-        cal.hpxml.get_consumptions()[0]
+        cal.hpxml._get_consumptions()[0]
         .ConsumptionDetails.ConsumptionInfo[0]
         .ConsumptionType.Energy.FuelType
         == raw_bills["FuelType"].unique()[0]
     )
     assert (
-        cal.hpxml.get_consumptions()[0]
+        cal.hpxml._get_consumptions()[0]
         .ConsumptionDetails.ConsumptionInfo[1]
         .ConsumptionType.Energy.FuelType
         == raw_bills["FuelType"].unique()[1]
     )
     # Spot-check that the Consumption xml element matches the csv utility data
     assert (
-        cal.hpxml.get_consumptions()[0]
+        cal.hpxml._get_consumptions()[0]
         .ConsumptionDetails.ConsumptionInfo[0]
         .ConsumptionDetail[2]
         .Consumption
         == 1200
     )
     assert (
-        cal.hpxml.get_consumptions()[0]
+        cal.hpxml._get_consumptions()[0]
         .ConsumptionDetails.ConsumptionInfo[1]
         .ConsumptionDetail[2]
         .Consumption

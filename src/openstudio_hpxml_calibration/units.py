@@ -150,7 +150,7 @@ SCALARS = {
 }
 
 
-def convert_units(
+def _convert_units(
     x: float | int | np.ndarray | pd.Series, from_: str, to_: str
 ) -> float | np.ndarray | pd.Series:
     """Convert a number from one unit to another
@@ -200,7 +200,7 @@ def convert_units(
     raise ValueError(f"Conversion from {from_} to {to_} not found")
 
 
-def convert_hpxml_energy_units(
+def _convert_hpxml_energy_units(
     x: float | np.ndarray | pd.Series,
     from_: EnergyUnitType,
     to_: EnergyUnitType,
@@ -224,7 +224,7 @@ def convert_hpxml_energy_units(
     from_val = hpxml_fuel_type_mapping[from_]
     to_val = hpxml_fuel_type_mapping[to_]
     try:
-        return convert_units(x, from_val, to_val)
+        return _convert_units(x, from_val, to_val)
     except ValueError as ex:
         if fuel_type in (
             FuelType.PROPANE,
@@ -239,6 +239,6 @@ def convert_hpxml_energy_units(
                 from_val = gal_energy_val
             if to_ == EnergyUnitType.GAL:
                 to_val = gal_energy_val
-            return convert_units(x, from_val, to_val)
+            return _convert_units(x, from_val, to_val)
         else:
             raise ex

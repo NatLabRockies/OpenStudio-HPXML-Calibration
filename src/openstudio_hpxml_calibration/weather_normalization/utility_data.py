@@ -4,19 +4,13 @@ import warnings
 import eeweather
 import numpy as np
 import pandas as pd
-import yaml
 from lxml import objectify
 
 from openstudio_hpxml_calibration.hpxml import EnergyUnitType, FuelType, HpxmlDoc
-from openstudio_hpxml_calibration.units import convert_units
+from openstudio_hpxml_calibration.units import _convert_units
 
 
-def read_yaml_file(config_path: str):
-    with open(config_path) as file:
-        return yaml.safe_load(file)
-
-
-def get_datetime_subel(el: objectify.ObjectifiedElement, subel_name: str) -> pd.Timestamp | None:
+def _get_datetime_subel(el: objectify.ObjectifiedElement, subel_name: str) -> pd.Timestamp | None:
     subel = getattr(el, subel_name, None)
     if subel is None:
         return subel
@@ -24,7 +18,7 @@ def get_datetime_subel(el: objectify.ObjectifiedElement, subel_name: str) -> pd.
         return pd.to_datetime(str(subel))
 
 
-def get_bills_from_hpxml(
+def _get_bills_from_hpxml(
     hpxml: HpxmlDoc, building_id: str | None = None
 ) -> tuple[dict[FuelType, pd.DataFrame], dict[FuelType, EnergyUnitType], dt.timezone]:
     """Get utility bills from an HPXML file.
@@ -41,12 +35,12 @@ def get_bills_from_hpxml(
     :rtype: tuple[dict[FuelType, pd.DataFrame], dict[FuelType, EnergyUnitType], dt.timezone]
     """
     if building_id is None:
-        building_id = hpxml.get_first_building_id()
-    building = hpxml.get_building(building_id)
+        building_id = hpxml._get_first_building_id()
+    building = hpxml._get_building(building_id)
     try:
         utc_offset = int(building.Site.TimeZone.UTCOffset)
     except AttributeError:
-        _, epw_metadata = hpxml.get_epw_data(building_id)
+        _, epw_metadata = hpxml._get_epw_data(building_id)
         utc_offset = epw_metadata["TZ"]
 
     local_standard_tz = dt.timezone(dt.timedelta(hours=utc_offset))
@@ -73,8 +67,8 @@ def get_bills_from_hpxml(
             for el in cons_info.ConsumptionDetail:
                 rows.append(
                     [
-                        get_datetime_subel(el, "StartDateTime"),
-                        get_datetime_subel(el, "EndDateTime"),
+                        _get_datetime_subel(el, "StartDateTime"),
+                        _get_datetime_subel(el, "EndDateTime"),
                         float(el.Consumption),
                     ]
                 )
@@ -97,7 +91,7 @@ def get_bills_from_hpxml(
     return bills_by_fuel_type, bill_units, local_standard_tz
 
 
-def join_bills_weather(bills_orig: pd.DataFrame, lat: float, lon: float, **kw) -> pd.DataFrame:
+def _join_bills_weather(bills_orig: pd.DataFrame, lat: float, lon: float, **kw) -> pd.DataFrame:
     """Join the bills dataframe with an average daily temperature
 
     :param bills_orig: Dataframe with columns `start_date`, `end_date`, and `consumption` representing each bill period.
@@ -120,7 +114,7 @@ def join_bills_weather(bills_orig: pd.DataFrame, lat: float, lon: float, **kw) -
         )
         tempC, _ = isd_station.load_isd_hourly_temp_data(start_date, end_date)
     tempC = tempC.tz_convert(bills_orig["start_date"].dt.tz)
-    tempF = convert_units(tempC, "c", "f")
+    tempF = _convert_units(tempC, "c", "f")
     bills = bills_orig.copy()
     bills["n_days"] = (
         (bills_orig["end_date"] - bills_orig["start_date"]).dt.total_seconds() / 60 / 60 / 24

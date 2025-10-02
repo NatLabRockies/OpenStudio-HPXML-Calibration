@@ -13,12 +13,12 @@ from loguru import logger
 
 from openstudio_hpxml_calibration.utils import (
     OS_HPXML_PATH,
-    get_tmy3_weather,
-    plot_absolute_error_series,
-    plot_avg_penalty,
-    plot_bias_error_series,
-    plot_fuel_type_curve_fits,
-    plot_min_penalty,
+    _get_tmy3_weather,
+    _plot_absolute_error_series,
+    _plot_avg_penalty,
+    _plot_bias_error_series,
+    _plot_fuel_type_curve_fits,
+    _plot_min_penalty,
 )
 
 from .enums import Format, Granularity
@@ -159,7 +159,7 @@ def download_weather(
     """Download TMY3 weather files from NREL"""
     verbosity = sum(verbose)
     set_log_level(verbosity)
-    get_tmy3_weather()
+    _get_tmy3_weather()
 
 
 @app.command
@@ -274,13 +274,13 @@ def calibrate(
     avg_penalty = [entry["avg"] for entry in logbook]
 
     # plot calibration results
-    plot_min_penalty(min_penalty, output_filepath, filename)
-    plot_avg_penalty(avg_penalty, output_filepath, filename)
-    plot_bias_error_series(logbook, output_filepath, filename)
-    plot_absolute_error_series(logbook, output_filepath, filename)
+    _plot_min_penalty(min_penalty, output_filepath, filename)
+    _plot_avg_penalty(avg_penalty, output_filepath, filename)
+    _plot_bias_error_series(logbook, output_filepath, filename)
+    _plot_absolute_error_series(logbook, output_filepath, filename)
 
     # Plot fuel type curve fits
-    plot_fuel_type_curve_fits(cal.inv_model, output_filepath, filename)
+    _plot_fuel_type_curve_fits(cal.inv_model, output_filepath, filename)
 
 
 if __name__ == "__main__":
