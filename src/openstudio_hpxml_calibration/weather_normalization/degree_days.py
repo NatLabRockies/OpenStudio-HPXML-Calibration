@@ -4,10 +4,10 @@ import pandas as pd
 
 import openstudio_hpxml_calibration.weather_normalization.utility_data as ud
 from openstudio_hpxml_calibration.hpxml import HpxmlDoc
-from openstudio_hpxml_calibration.units import _convert_units
+from openstudio_hpxml_calibration.units import convert_units
 
 
-def _calc_daily_dbs(hpxml: HpxmlDoc) -> namedtuple:
+def calc_daily_dbs(hpxml: HpxmlDoc) -> namedtuple:
     """
     Calculate daily average dry bulb temperatures from EPW weather data.
 
@@ -20,13 +20,13 @@ def _calc_daily_dbs(hpxml: HpxmlDoc) -> namedtuple:
     :rtype: namedtuple
     """
     DailyTemps = namedtuple("DailyTemps", ["c", "f"])
-    epw, _ = hpxml._get_epw_data(coerce_year=2007)
+    epw, _ = hpxml.get_epw_data(coerce_year=2007)
     epw_daily_avg_temp_c = epw["temp_air"].groupby(pd.Grouper(freq="D")).mean()
-    epw_daily_avg_temp_f = _convert_units(epw_daily_avg_temp_c, "c", "f")
+    epw_daily_avg_temp_f = convert_units(epw_daily_avg_temp_c, "c", "f")
     return DailyTemps(c=epw_daily_avg_temp_c, f=epw_daily_avg_temp_f)
 
 
-def _calc_degree_days(daily_dbs: pd.Series, base_temp_f: float, is_heating: bool) -> float:
+def calc_degree_days(daily_dbs: pd.Series, base_temp_f: float, is_heating: bool) -> float:
     """
     Calculate degree days from daily temperature data.
 
@@ -57,7 +57,7 @@ def _calc_degree_days(daily_dbs: pd.Series, base_temp_f: float, is_heating: bool
     return deg_days_sum
 
 
-def _calc_heat_cool_degree_days(dailydbs: pd.Series) -> dict:
+def calc_heat_cool_degree_days(dailydbs: pd.Series) -> dict:
     """
     Calculate heating and cooling degree days from daily temperature data.
 
@@ -70,14 +70,14 @@ def _calc_heat_cool_degree_days(dailydbs: pd.Series) -> dict:
     :rtype: dict
     """
     degree_days = {}
-    degree_days["HDD65F"] = _calc_degree_days(dailydbs, 65, True)
-    # degree_days["HDD50F"] = _calc_degree_days(dailydbs, 50, True)
-    degree_days["CDD65F"] = _calc_degree_days(dailydbs, 65, False)
-    # degree_days["CDD50F"] = _calc_degree_days(dailydbs, 50, False)
+    degree_days["HDD65F"] = calc_degree_days(dailydbs, 65, True)
+    # degree_days["HDD50F"] = calc_degree_days(dailydbs, 50, True)
+    degree_days["CDD65F"] = calc_degree_days(dailydbs, 65, False)
+    # degree_days["CDD50F"] = calc_degree_days(dailydbs, 50, False)
     return degree_days
 
 
-def _calculate_annual_degree_days(hpxml: HpxmlDoc) -> tuple[dict, dict]:
+def calculate_annual_degree_days(hpxml: HpxmlDoc) -> tuple[dict, dict]:
     """
     Calculate annual heating and cooling degree days for each fuel type.
 
@@ -89,9 +89,9 @@ def _calculate_annual_degree_days(hpxml: HpxmlDoc) -> tuple[dict, dict]:
     :return: Tuple containing dictionaries of total period TMY degree days and actual degree days by fuel type.
     :rtype: tuple[dict, dict]
     """
-    tmy_dry_bulb_temps_f = _calc_daily_dbs(hpxml).f
-    bills_by_fuel_type, _, _ = ud._get_bills_from_hpxml(hpxml)
-    lat, lon = hpxml._get_lat_lon()
+    tmy_dry_bulb_temps_f = calc_daily_dbs(hpxml).f
+    bills_by_fuel_type, _, _ = ud.get_bills_from_hpxml(hpxml)
+    lat, lon = hpxml.get_lat_lon()
     bill_tmy_degree_days = {}
     total_period_actual_dd = {}
 
@@ -102,9 +102,9 @@ def _calculate_annual_degree_days(hpxml: HpxmlDoc) -> tuple[dict, dict]:
         # format fuel type for dictionary keys
         fuel_type_name = fuel_type.name.lower().replace("_", " ")
         # Get degree days of actual weather during bill periods
-        _, actual_temp_f = ud._join_bills_weather(bills, lat, lon)
+        _, actual_temp_f = ud.join_bills_weather(bills, lat, lon)
         daily_actual_temps = actual_temp_f.resample("D").mean()
-        actual_degree_days = _calc_heat_cool_degree_days(daily_actual_temps)
+        actual_degree_days = calc_heat_cool_degree_days(daily_actual_temps)
         actual_degree_days = {k: round(v) for k, v in actual_degree_days.items()}
         total_period_actual_dd[fuel_type_name] = actual_degree_days
 
@@ -122,7 +122,7 @@ def _calculate_annual_degree_days(hpxml: HpxmlDoc) -> tuple[dict, dict]:
 
             # Select the dry bulb temperatures for the bill period
             bill_dry_bulbs_tmy = tmy_dry_bulb_temps_f[mask]
-            tmy_degree_days = _calc_heat_cool_degree_days(bill_dry_bulbs_tmy)
+            tmy_degree_days = calc_heat_cool_degree_days(bill_dry_bulbs_tmy)
             bill_results.append(
                 {
                     "start_date": row["start_date"],

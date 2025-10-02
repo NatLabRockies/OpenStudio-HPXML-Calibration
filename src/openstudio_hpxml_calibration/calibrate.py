@@ -19,11 +19,11 @@ from pathos.multiprocessing import ProcessingPool as Pool
 
 from openstudio_hpxml_calibration import app
 from openstudio_hpxml_calibration.hpxml import FuelType, HpxmlDoc
-from openstudio_hpxml_calibration.modify_hpxml import _set_consumption_on_hpxml
-from openstudio_hpxml_calibration.units import _convert_units
+from openstudio_hpxml_calibration.modify_hpxml import set_consumption_on_hpxml
+from openstudio_hpxml_calibration.units import convert_units
 from openstudio_hpxml_calibration.utils import _load_config
 from openstudio_hpxml_calibration.weather_normalization.degree_days import (
-    _calculate_annual_degree_days,
+    calculate_annual_degree_days,
 )
 from openstudio_hpxml_calibration.weather_normalization.inverse_model import InverseModel
 from openstudio_hpxml_calibration.weather_normalization.regression import Bpi2400ModelFitError
@@ -38,7 +38,7 @@ global_seed = 2025
 random.seed(global_seed)
 
 
-def _init_worker(seed):
+def init_worker(seed):
     """Initialize the random seed for a worker process.
 
     :param seed: The base seed to use for randomization.
@@ -74,9 +74,9 @@ class Calibrate:
 
         if csv_bills_filepath:
             logger.debug(f"Adding utility data from {csv_bills_filepath} to hpxml")
-            self.hpxml = _set_consumption_on_hpxml(self.hpxml, csv_bills_filepath)
+            self.hpxml = set_consumption_on_hpxml(self.hpxml, csv_bills_filepath)
 
-        self.hpxml._hpxml_data_error_checking(self.ga_config)
+        self.hpxml.hpxml_data_error_checking(self.ga_config)
 
     def get_normalized_consumption_per_bill(self) -> dict[FuelType, pd.DataFrame]:
         """Get the normalized consumption for the building.
@@ -117,10 +117,10 @@ class Calibrate:
                 return subset
 
             try:
-                predicted_daily_btu = self.inv_model._predict_epw_daily(fuel_type=fuel_type)
-                epw_daily_kbtu = _convert_units(x=predicted_daily_btu, from_="btu", to_="kbtu")
+                predicted_daily_btu = self.inv_model.predict_epw_daily(fuel_type=fuel_type)
+                epw_daily_kbtu = convert_units(x=predicted_daily_btu, from_="btu", to_="kbtu")
 
-                epw_daily_mbtu = _convert_units(epw_daily_kbtu, from_="kbtu", to_="mbtu")
+                epw_daily_mbtu = convert_units(epw_daily_kbtu, from_="kbtu", to_="mbtu")
 
                 normalized_consumption[fuel_type.value] = pd.DataFrame(
                     data=bills.apply(_calculate_wrapped_total, axis=1)
@@ -161,7 +161,7 @@ class Calibrate:
             if (
                 fuel_type == "electricity"
                 and "Heating" in end_use
-                and FuelType.ELECTRICITY.value not in self.hpxml._get_fuel_types()["heating"]
+                and FuelType.ELECTRICITY.value not in self.hpxml.get_fuel_types()["heating"]
             ):
                 continue
             if "Heating" in end_use:
@@ -221,13 +221,13 @@ class Calibrate:
                         # All results from simulation and normalized bills are in MBtu.
                         # convert electric loads from MBtu to kWh for bpi2400
                         annual_normalized_bill_consumption[model_fuel_type][load_type] = (
-                            _convert_units(
+                            convert_units(
                                 annual_normalized_bill_consumption[model_fuel_type][load_type],
                                 from_="mbtu",
                                 to_="kwh",
                             )
                         )
-                        disagg_result = _convert_units(disagg_result, from_="mbtu", to_="kwh")
+                        disagg_result = convert_units(disagg_result, from_="mbtu", to_="kwh")
 
                     # Calculate error levels
                     if annual_normalized_bill_consumption[model_fuel_type][load_type] == 0:
@@ -272,7 +272,7 @@ class Calibrate:
         :return: Tuple containing bias and absolute error metrics for each end use, and weather-normalized annual consumption by end use.
         :rtype: tuple[dict, dict]
         """
-        total_period_tmy_dd, total_period_actual_dd = _calculate_annual_degree_days(self.hpxml)
+        total_period_tmy_dd, total_period_actual_dd = calculate_annual_degree_days(self.hpxml)
 
         comparison_results = {}
         if isinstance(model_results, str):
@@ -297,7 +297,7 @@ class Calibrate:
                 fuel_unit_type = f"{fuel_unit_type}_propane"
             elif fuel_unit_type == "therms":
                 fuel_unit_type = "therm"
-        measured_consumption = _convert_units(measured_consumption, str(fuel_unit_type), "mBtu")
+        measured_consumption = convert_units(measured_consumption, str(fuel_unit_type), "mBtu")
 
         modeled_baseload = model_results[fuel_type].get("baseload", 0)
         modeled_heating = model_results[fuel_type].get("heating", 0)
@@ -386,7 +386,7 @@ class Calibrate:
             FuelType.WOOD.value,
             FuelType.WOOD_PELLETS.value,
         )
-        consumptions = self.hpxml._get_consumptions()
+        consumptions = self.hpxml.get_consumptions()
 
         for consumption in consumptions:
             for fuel_info in consumption.ConsumptionDetails.ConsumptionInfo:
@@ -984,7 +984,7 @@ class Calibrate:
         with Pool(
             processes=num_proc,
             maxtasksperchild=15,
-            initializer=_init_worker,
+            initializer=init_worker,
             initargs=(global_seed,),
         ) as pool:
             toolbox.register("map", pool.map)

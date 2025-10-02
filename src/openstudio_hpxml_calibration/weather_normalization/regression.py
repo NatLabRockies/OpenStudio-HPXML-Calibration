@@ -26,10 +26,10 @@ class UtilityBillRegressionModel:
         self.xscale = None
 
     @property
-    def _n_parameters(self) -> int:
+    def n_parameters(self) -> int:
         return len(self.INITIAL_GUESSES)
 
-    def _fit(self, bills_temps: pd.DataFrame) -> None:
+    def fit(self, bills_temps: pd.DataFrame) -> None:
         """Fit the regression model to the provided billing and temperature data.
 
         This method estimates the model parameters that best fit the given data
@@ -39,7 +39,7 @@ class UtilityBillRegressionModel:
         :type bills_temps: pd.DataFrame
         """
         popt, pcov = curve_fit(
-            self._func,
+            self.func,
             bills_temps["avg_temp"].to_numpy(),
             bills_temps["daily_consumption"].to_numpy(),
             p0=self.INITIAL_GUESSES,
@@ -49,7 +49,7 @@ class UtilityBillRegressionModel:
         )
         self.parameters = popt
         self.pcov = pcov
-        self.cvrmse = self._calc_cvrmse(bills_temps)
+        self.cvrmse = self.calc_cvrmse(bills_temps)
 
     def __call__(self, temperatures: np.ndarray) -> np.ndarray:
         """Given an array of temperatures [degF], return the predicted energy use.
@@ -61,9 +61,9 @@ class UtilityBillRegressionModel:
         :return: An array of daily energy use, in the units the model was trained on.
         :rtype: np.ndarray
         """
-        return self._func(temperatures, *self.parameters)
+        return self.func(temperatures, *self.parameters)
 
-    def _predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
+    def predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
         """Predict the disaggregated energy use for a given array of temperatures.
 
         :param temperatures: An array of daily temperatures in degF.
@@ -73,9 +73,7 @@ class UtilityBillRegressionModel:
         """
         raise NotImplementedError
 
-    def _func(
-        self, x: Sequence[float] | np.ndarray, *args: list[float | np.floating]
-    ) -> np.ndarray:
+    def func(self, x: Sequence[float] | np.ndarray, *args: list[float | np.floating]) -> np.ndarray:
         """Model function to be implemented by subclasses.
 
         :param x: Independent variable, typically temperature.
@@ -87,7 +85,7 @@ class UtilityBillRegressionModel:
         """
         raise NotImplementedError
 
-    def _calc_cvrmse(self, bills_temps: pd.DataFrame) -> float:
+    def calc_cvrmse(self, bills_temps: pd.DataFrame) -> float:
         """Calculate the CVRMSE for the model and the bills_temps dataframe.
 
         :param bills_temps: A dataframe with bills and temperatures
@@ -97,10 +95,10 @@ class UtilityBillRegressionModel:
         """
         y = bills_temps["daily_consumption"].to_numpy()
         y_hat = self(bills_temps["avg_temp"].to_numpy())
-        return np.sqrt(np.sum((y - y_hat) ** 2) / (y.shape[0] - self._n_parameters)) / y.mean()
+        return np.sqrt(np.sum((y - y_hat) ** 2) / (y.shape[0] - self.n_parameters)) / y.mean()
 
 
-def _estimate_initial_guesses_3param(model_type: str, bills_temps: pd.DataFrame) -> list[float]:
+def estimate_initial_guesses_3param(model_type: str, bills_temps: pd.DataFrame) -> list[float]:
     """Estimate initial guesses for the parameters of the 3-parameter model.
 
     :param model_type: Type of the model, either "cooling" or "heating".
@@ -134,7 +132,7 @@ def _estimate_initial_guesses_3param(model_type: str, bills_temps: pd.DataFrame)
         raise ValueError("Unknown model type")
 
 
-def _estimate_initial_guesses_5param(bills_temps: pd.DataFrame) -> list[float]:
+def estimate_initial_guesses_5param(bills_temps: pd.DataFrame) -> list[float]:
     """Estimate initial guesses for the parameters of the 5-parameter model.
 
     :param bills_temps: A dataframe with bills and temperatures
@@ -166,7 +164,7 @@ def _estimate_initial_guesses_5param(bills_temps: pd.DataFrame) -> list[float]:
     return [b1, b2, b3, b4, b5]
 
 
-def _estimate_bounds_3param(model_type: str, bills_temps: pd.DataFrame) -> Bounds:
+def estimate_bounds_3param(model_type: str, bills_temps: pd.DataFrame) -> Bounds:
     """Estimate the bounds for the parameters of the 3-parameter model.
 
     :param model_type: Type of the model, either "cooling" or "heating".
@@ -189,7 +187,7 @@ def _estimate_bounds_3param(model_type: str, bills_temps: pd.DataFrame) -> Bound
         raise ValueError("Unknown model type")
 
 
-def _estimate_bounds_5param(bills_temps: pd.DataFrame) -> Bounds:
+def estimate_bounds_5param(bills_temps: pd.DataFrame) -> Bounds:
     """Estimate the bounds for the parameters of the 5-parameter model.
 
     :param bills_temps: A dataframe with bills and temperatures
@@ -215,18 +213,18 @@ class ThreeParameterCooling(UtilityBillRegressionModel):
     def __init__(self):
         super().__init__()
 
-    def _fit(self, bills_temps: pd.DataFrame) -> None:
+    def fit(self, bills_temps: pd.DataFrame) -> None:
         """Fit the regression model to the cooling billing and temperature data.
 
         :param bills_temps: A dataframe containing cooling billing and temperature data.
         :type bills_temps: pd.DataFrame
         """
-        self.INITIAL_GUESSES = _estimate_initial_guesses_3param("cooling", bills_temps)
-        self.BOUNDS = _estimate_bounds_3param("cooling", bills_temps)
+        self.INITIAL_GUESSES = estimate_initial_guesses_3param("cooling", bills_temps)
+        self.BOUNDS = estimate_bounds_3param("cooling", bills_temps)
         self.XSCALE = np.array([5000.0, 1000.0, 1.0])
-        super()._fit(bills_temps)
+        super().fit(bills_temps)
 
-    def _func(
+    def func(
         self,
         x: Sequence[float] | np.ndarray,
         b1: float | np.floating,
@@ -249,7 +247,7 @@ class ThreeParameterCooling(UtilityBillRegressionModel):
         x_arr = np.array(x)
         return b1 + b2 * np.maximum(x_arr - b3, 0)
 
-    def _predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
+    def predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
         """Predict the disaggregated energy use for a given array of temperatures.
 
         :param temperatures: An array of daily temperatures in degF.
@@ -273,18 +271,18 @@ class ThreeParameterHeating(UtilityBillRegressionModel):
     def __init__(self):
         super().__init__()
 
-    def _fit(self, bills_temps: pd.DataFrame) -> None:
+    def fit(self, bills_temps: pd.DataFrame) -> None:
         """Fit the regression model to the heating billing and temperature data.
 
         :param bills_temps: A dataframe containing heating billing and temperature data.
         :type bills_temps: pd.DataFrame
         """
-        self.INITIAL_GUESSES = _estimate_initial_guesses_3param("heating", bills_temps)
-        self.BOUNDS = _estimate_bounds_3param("heating", bills_temps)
+        self.INITIAL_GUESSES = estimate_initial_guesses_3param("heating", bills_temps)
+        self.BOUNDS = estimate_bounds_3param("heating", bills_temps)
         self.XSCALE = np.array([5000.0, 1000.0, 1.0])
-        super()._fit(bills_temps)
+        super().fit(bills_temps)
 
-    def _func(
+    def func(
         self,
         x: Sequence[float],
         b1: float | np.floating,
@@ -307,7 +305,7 @@ class ThreeParameterHeating(UtilityBillRegressionModel):
         x_arr = np.array(x)
         return b1 + b2 * np.minimum(x_arr - b3, 0)
 
-    def _predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
+    def predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
         """Predict the disaggregated energy use for a given array of temperatures.
 
         :param temperatures: An array of daily temperatures in degF.
@@ -331,21 +329,21 @@ class FiveParameter(UtilityBillRegressionModel):
     def __init__(self):
         super().__init__()
 
-    def _fit(self, bills_temps: pd.DataFrame) -> None:
+    def fit(self, bills_temps: pd.DataFrame) -> None:
         """Fit the regression model to the heating and cooling billing and temperature data.
 
         :param bills_temps: A dataframe containing heating and cooling billing and temperature data.
         :type bills_temps: pd.DataFrame
         """
-        self.INITIAL_GUESSES = _estimate_initial_guesses_5param(bills_temps)
-        self.BOUNDS = _estimate_bounds_5param(bills_temps)
+        self.INITIAL_GUESSES = estimate_initial_guesses_5param(bills_temps)
+        self.BOUNDS = estimate_bounds_5param(bills_temps)
         self.XSCALE = np.array([5000.0, 1000.0, 1000.0, 1.0, 1.0])
 
         x = bills_temps["avg_temp"].to_numpy()
         y = bills_temps["daily_consumption"].to_numpy()
 
         def objective(params):
-            return np.sum((self._func(x, *params) - y) ** 2)
+            return np.sum((self.func(x, *params) - y) ** 2)
 
         # Constrain the heating and cooling balance temps to differ by more than 5
         # constraints = {
@@ -370,9 +368,9 @@ class FiveParameter(UtilityBillRegressionModel):
 
         self.parameters = result.x
         self.pcov = None  # scipy.optimize.minimize doesn't calculate it
-        self.cvrmse = self._calc_cvrmse(bills_temps)
+        self.cvrmse = self.calc_cvrmse(bills_temps)
 
-    def _func(
+    def func(
         self,
         x: Sequence[float],
         b1: float | np.floating,
@@ -401,7 +399,7 @@ class FiveParameter(UtilityBillRegressionModel):
         x_arr = np.array(x)
         return b1 + b2 * np.minimum(x_arr - b4, 0) + b3 * np.maximum(x_arr - b5, 0)
 
-    def _predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
+    def predict_disaggregated(self, temperatures: Sequence[float] | np.ndarray) -> pd.DataFrame:
         """Predict the disaggregated energy use for a given array of temperatures.
 
         :param temperatures: An array of daily temperatures in degF.
@@ -425,7 +423,7 @@ class Bpi2400ModelFitError(Exception):
     """
 
 
-def _fit_model(
+def fit_model(
     bills_temps: pd.DataFrame,
     cvrmse_requirement: float,
     conditioning_fuels: set,
@@ -434,7 +432,7 @@ def _fit_model(
     """Fit a regression model to the utility bills
 
     The ``bills_temps`` dataframe should be in the format returned by the
-    ``utility_data._join_bills_weather`` function. At a minimum this should
+    ``utility_data.join_bills_weather`` function. At a minimum this should
     include the columns "daily_consumption" and "avg_temp" in degF. The index is
     ignored.
 
@@ -452,7 +450,7 @@ def _fit_model(
     for ModelClass in models_to_try:
         model = ModelClass()
         try:
-            model._fit(bills_temps)
+            model.fit(bills_temps)
             models.append(model)
         except RuntimeError as ex:
             if (

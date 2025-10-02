@@ -8,12 +8,12 @@ from matplotlib import pyplot as plt
 
 import openstudio_hpxml_calibration.weather_normalization.utility_data as ud
 from openstudio_hpxml_calibration.hpxml import FuelType, HpxmlDoc
-from openstudio_hpxml_calibration.units import _convert_units
-from openstudio_hpxml_calibration.utils import _load_config, _plot_fuel_type_curve_fits
+from openstudio_hpxml_calibration.units import convert_units
+from openstudio_hpxml_calibration.utils import _load_config, plot_fuel_type_curve_fits
 from openstudio_hpxml_calibration.weather_normalization.inverse_model import InverseModel
 from openstudio_hpxml_calibration.weather_normalization.regression import (
     Bpi2400ModelFitError,
-    _fit_model,
+    fit_model,
 )
 
 test_config = _load_config("tests/data/test_config.yaml")
@@ -27,7 +27,7 @@ ihmh_home_hpxmls = list((repo_root / "test_hpxmls" / "ihmh_homes").glob("*.xml")
 @pytest.mark.parametrize("filename", ira_rebate_hpxmls, ids=lambda x: x.stem)
 def test_hpxml_utility_bill_read(filename):
     hpxml = HpxmlDoc(filename)
-    bills, _bill_units, _tz = ud._get_bills_from_hpxml(hpxml)
+    bills, _bill_units, _tz = ud.get_bills_from_hpxml(hpxml)
     assert any("electricity" in fuel_type.value for fuel_type in bills)
 
     for fuel_type, df in bills.items():
@@ -43,7 +43,7 @@ def test_hpxml_utility_bill_read_missing_start_end_date(filename):
             el.getparent().remove(el)
 
         # Load the bills
-        bills_by_fuel_type, _bill_units, _tz = ud._get_bills_from_hpxml(hpxml)
+        bills_by_fuel_type, _bill_units, _tz = ud.get_bills_from_hpxml(hpxml)
         assert any("electricity" in fuel_type.value for fuel_type in bills_by_fuel_type)
 
         # Ensure the dates got filled in
@@ -56,10 +56,10 @@ def test_hpxml_utility_bill_read_missing_start_end_date(filename):
 @pytest.mark.parametrize("filename", ira_rebate_hpxmls, ids=lambda x: x.stem)
 def test_weather_retrieval(results_dir, filename):
     hpxml = HpxmlDoc(filename)
-    lat, lon = hpxml._get_lat_lon()
-    bills_by_fuel_type, _bill_units, _tz = ud._get_bills_from_hpxml(hpxml)
+    lat, lon = hpxml.get_lat_lon()
+    bills_by_fuel_type, _bill_units, _tz = ud.get_bills_from_hpxml(hpxml)
     for fuel_type, bills in bills_by_fuel_type.items():
-        bills_temps, _ = ud._join_bills_weather(bills, lat, lon)
+        bills_temps, _ = ud.join_bills_weather(bills, lat, lon)
         fig = plt.figure(figsize=(8, 6))
         plt.scatter(bills_temps["avg_temp"], bills_temps["daily_consumption"])
         fig.savefig(
@@ -93,7 +93,7 @@ def test_curve_fit_and_fit_model(results_dir, filename):
         successful_fits = 0  # Track number of successful fits
         output_filepath = results_dir / "weather_normalization"
 
-        fuel_types = hpxml._get_fuel_types()
+        fuel_types = hpxml.get_fuel_types()
         conditioning_fuels = fuel_types["heating"] | fuel_types["cooling"]
         delivered_fuels = (
             FuelType.FUEL_OIL.value,
@@ -106,10 +106,10 @@ def test_curve_fit_and_fit_model(results_dir, filename):
             if fuel_type.value in delivered_fuels:
                 continue  # Skip delivered fuels
 
-            model = inv_model._get_model(fuel_type)
+            model = inv_model.get_model(fuel_type)
             bills_temps = inv_model.bills_weather_by_fuel_type_in_btu[fuel_type]
-            cvrmse = model._calc_cvrmse(bills_temps)
-            _plot_fuel_type_curve_fits(inv_model, output_filepath, filename.stem)
+            cvrmse = model.calc_cvrmse(bills_temps)
+            plot_fuel_type_curve_fits(inv_model, output_filepath, filename.stem)
 
             # Save CVRMSE result per test
             individual_result = {f"{filename.stem}_{fuel_type}": cvrmse}
@@ -117,7 +117,7 @@ def test_curve_fit_and_fit_model(results_dir, filename):
             with open(json_path, "w") as f:
                 json.dump(individual_result, f, indent=2)
 
-            best_fitting_model = _fit_model(
+            best_fitting_model = fit_model(
                 bills_temps,
                 test_config["acceptance_criteria"]["bill_regression_max_cvrmse"],
                 conditioning_fuels,
@@ -141,7 +141,7 @@ def test_normalize_consumption_to_epw():
     inv_model = InverseModel(hpxml, user_config=test_config)
 
     for fuel_type, bills in inv_model.bills_by_fuel_type.items():
-        epw_daily = _convert_units(inv_model._predict_epw_daily(fuel_type), "BTU", "kBTU")
+        epw_daily = convert_units(inv_model.predict_epw_daily(fuel_type), "BTU", "kBTU")
         print(f"EPW Daily {fuel_type.value} (kbtu):\n", epw_daily)
         epw_annual = epw_daily.sum()
         print(f"EPW Annual {fuel_type.value} (kbtu):\n", epw_annual)

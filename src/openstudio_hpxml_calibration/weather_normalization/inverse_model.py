@@ -2,10 +2,10 @@ import pandas as pd
 
 import openstudio_hpxml_calibration.weather_normalization.utility_data as ud
 from openstudio_hpxml_calibration.hpxml import EnergyUnitType, FuelType, HpxmlDoc
-from openstudio_hpxml_calibration.units import _convert_hpxml_energy_units
+from openstudio_hpxml_calibration.units import convert_hpxml_energy_units
 from openstudio_hpxml_calibration.weather_normalization.regression import (
     UtilityBillRegressionModel,
-    _fit_model,
+    fit_model,
 )
 
 
@@ -24,16 +24,16 @@ class InverseModel:
         self.user_config = user_config
         self.hpxml = hpxml
         self.building_id = building_id
-        self.bills_by_fuel_type, self.bill_units, self.tz = ud._get_bills_from_hpxml(
+        self.bills_by_fuel_type, self.bill_units, self.tz = ud.get_bills_from_hpxml(
             hpxml, building_id
         )
         self.bills_weather_by_fuel_type_in_btu = {}
-        self.lat_lon = hpxml._get_lat_lon()
+        self.lat_lon = hpxml.get_lat_lon()
         self.regression_models: dict[FuelType, UtilityBillRegressionModel] = {}
         for fuel_type, bills in self.bills_by_fuel_type.items():
-            bills_weather, _ = ud._join_bills_weather(bills, *self.lat_lon)
+            bills_weather, _ = ud.join_bills_weather(bills, *self.lat_lon)
             for col in ["consumption", "daily_consumption"]:
-                bills_weather[col] = _convert_hpxml_energy_units(
+                bills_weather[col] = convert_hpxml_energy_units(
                     bills_weather[col],
                     self.bill_units[fuel_type],
                     EnergyUnitType.BTU,
@@ -41,7 +41,7 @@ class InverseModel:
                 )
             self.bills_weather_by_fuel_type_in_btu[fuel_type] = bills_weather
 
-    def _get_model(self, fuel_type: FuelType) -> UtilityBillRegressionModel:
+    def get_model(self, fuel_type: FuelType) -> UtilityBillRegressionModel:
         """
         Retrieve or fit the regression model for a given fuel type.
 
@@ -57,9 +57,9 @@ class InverseModel:
             return self.regression_models[fuel_type]
         except KeyError:
             bills_weather = self.bills_weather_by_fuel_type_in_btu[fuel_type]
-            fuel_types = self.hpxml._get_fuel_types()
+            fuel_types = self.hpxml.get_fuel_types()
             conditioning_fuels = fuel_types["heating"] | fuel_types["cooling"]
-            model = _fit_model(
+            model = fit_model(
                 bills_weather,
                 cvrmse_requirement=self.user_config["acceptance_criteria"][
                     "bill_regression_max_cvrmse"
@@ -70,7 +70,7 @@ class InverseModel:
             self.regression_models[fuel_type] = model
             return model
 
-    def _predict_epw_daily(self, fuel_type: FuelType) -> pd.Series:
+    def predict_epw_daily(self, fuel_type: FuelType) -> pd.Series:
         """
         Predict daily energy consumption using the regression model for a given fuel type.
 
@@ -81,8 +81,8 @@ class InverseModel:
         :return: Array of predicted daily consumption values.
         :rtype: np.ndarray
         """
-        model = self._get_model(fuel_type)
-        epw, _ = self.hpxml._get_epw_data(coerce_year=2007)
+        model = self.get_model(fuel_type)
+        epw, _ = self.hpxml.get_epw_data(coerce_year=2007)
         epw_daily_avg_temp = epw["temp_air"].groupby(pd.Grouper(freq="D")).mean() * 1.8 + 32
-        daily_predicted_fuel_use = model._predict_disaggregated(epw_daily_avg_temp.to_numpy())
+        daily_predicted_fuel_use = model.predict_disaggregated(epw_daily_avg_temp.to_numpy())
         return daily_predicted_fuel_use

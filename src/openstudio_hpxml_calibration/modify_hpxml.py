@@ -15,7 +15,7 @@ NSMAP = {None: NS}
 E = ElementMaker(namespace=NS, nsmap=NSMAP)
 
 
-def _set_consumption_on_hpxml(hpxml_object: HpxmlDoc, csv_bills_filepath: Path) -> HpxmlDoc:
+def set_consumption_on_hpxml(hpxml_object: HpxmlDoc, csv_bills_filepath: Path) -> HpxmlDoc:
     """Add bills from csv to hpxml object"""
 
     bills = pd.read_csv(csv_bills_filepath)
@@ -30,7 +30,7 @@ def _set_consumption_on_hpxml(hpxml_object: HpxmlDoc, csv_bills_filepath: Path) 
     # Set up xml objects to hold the bill data
     consumption_details = E.ConsumptionDetails()
     consumption_section = E.Consumption(
-        E.BuildingID(idref=hpxml_object._get_first_building_id()),
+        E.BuildingID(idref=hpxml_object.get_first_building_id()),
         E.CustomerID(),
         consumption_details,
     )

@@ -67,10 +67,8 @@ class HpxmlDoc:
     """
     A class representing an HPXML document.
 
-    Attributes can be accessed using the lxml.objectify syntax:
-
+    Attributes can be accessed using the lxml.objectify syntax. i.e.
     hpxml = HpxmlDoc("filename.xml")
-
     hpxml.Building.Site.Address
 
     There are a number of helper functions to get other important information.
@@ -142,11 +140,11 @@ class HpxmlDoc:
         ns = re.match(r"\{(.+)\}", el.tag).group(1)
         return el.xpath(xpath_expr, namespaces={"h": ns}, **kw)
 
-    def _get_first_building_id(self) -> str:
+    def get_first_building_id(self) -> str:
         """Get the id of the first Building element in the file."""
         return self.xpath("h:Building[1]/h:BuildingID/@id", smart_strings=False)[0]
 
-    def _get_building(self, building_id: str | None = None) -> objectify.ObjectifiedElement:
+    def get_building(self, building_id: str | None = None) -> objectify.ObjectifiedElement:
         """Get a building element
 
         :param building_id: The id of the Building to retrieve, gets first one if missing
@@ -161,7 +159,7 @@ class HpxmlDoc:
                 0
             ]
 
-    def _get_fuel_types(self, building_id: str | None = None) -> tuple[str, set[str]]:
+    def get_fuel_types(self, building_id: str | None = None) -> tuple[str, set[str]]:
         """Get fuel types providing heating, cooling, water heating, clothes drying, and cooking
 
         :param building_id: The id of the Building to retrieve, gets first one if missing
@@ -170,7 +168,7 @@ class HpxmlDoc:
         :rtype: tuple[str, set[str]]
         """
 
-        building = self._get_building(building_id)
+        building = self.get_building(building_id)
         fuel_types = {
             "heating": set(),
             "cooling": set(),
@@ -238,7 +236,7 @@ class HpxmlDoc:
 
         return fuel_types
 
-    def _get_consumptions(
+    def get_consumptions(
         self, building_id: str | None = None
     ) -> tuple[objectify.ObjectifiedElement, ...]:
         """Get all Consumption elements for a building
@@ -255,7 +253,7 @@ class HpxmlDoc:
         )
 
     @functools.cache
-    def _get_epw_path(self, building_id: str | None = None) -> Path:
+    def get_epw_path(self, building_id: str | None = None) -> Path:
         """Get the filesystem path to the EPW file.
 
         Uses the same logic as OpenStudio-HPXML
@@ -266,7 +264,7 @@ class HpxmlDoc:
         :return: path to epw file
         :rtype: Path
         """
-        building = self._get_building(building_id)
+        building = self.get_building(building_id)
         try:
             epw_file = str(
                 building.BuildingDetails.ClimateandRiskZones.WeatherStation.extension.EPWFilePath
@@ -297,7 +295,7 @@ class HpxmlDoc:
         return epw_path
 
     @functools.cache
-    def _get_epw_data(self, building_id: str | None = None, **kw) -> tuple[pd.DataFrame, dict]:
+    def get_epw_data(self, building_id: str | None = None, **kw) -> tuple[pd.DataFrame, dict]:
         """Get the epw data as a dataframe
 
         :param building_id: The id of the Building to retrieve, gets first one if missing
@@ -305,9 +303,9 @@ class HpxmlDoc:
         :return: Dataframe of epw and a dict of epw metadata
         :rtype: tuple[pd.DataFrame, dict]
         """
-        return read_epw(self._get_epw_path(building_id), **kw)
+        return read_epw(self.get_epw_path(building_id), **kw)
 
-    def _get_lat_lon(self, building_id: str | None = None) -> tuple[float, float]:
+    def get_lat_lon(self, building_id: str | None = None) -> tuple[float, float]:
         """Get latitude, longitude from hpxml file
 
         :param building_id: Optional building_id of the building you want to get location for.
@@ -315,20 +313,20 @@ class HpxmlDoc:
         :return: Latitude and longitude
         :rtype: tuple[float, float]
         """
-        building = self._get_building(building_id)
+        building = self.get_building(building_id)
         try:
             # Option 1: Get directly from HPXML
             geolocation = building.Site.GeoLocation
             lat = float(geolocation.Latitude)
             lon = float(geolocation.Longitude)
         except AttributeError:
-            _, epw_metadata = self._get_epw_data(building_id)
+            _, epw_metadata = self.get_epw_data(building_id)
             lat = epw_metadata["latitude"]
             lon = epw_metadata["longitude"]
 
         return lat, lon
 
-    def _hpxml_data_error_checking(self, config: dict) -> None:
+    def hpxml_data_error_checking(self, config: dict) -> None:
         """Check for common HPXML errors
 
         :param config: Configuration dictionary, combination of default and user config
@@ -337,8 +335,8 @@ class HpxmlDoc:
         :raises ValueError: If an error is found
         """
         now = dt.now()
-        building = self._get_building()
-        consumptions = self._get_consumptions()
+        building = self.get_building()
+        consumptions = self.get_consumptions()
 
         # Check that the building doesn't have PV
         try:
@@ -559,7 +557,7 @@ class HpxmlDoc:
                 for _, fuel in all_fuels
             )
 
-        fuel_types = self._get_fuel_types()
+        fuel_types = self.get_fuel_types()
 
         for component, fuels in fuel_types.items():
             for fuel in fuels:

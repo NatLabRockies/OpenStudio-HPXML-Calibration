@@ -15,13 +15,13 @@ from tqdm import tqdm
 OS_HPXML_PATH = Path(__file__).resolve().parent.parent / "OpenStudio-HPXML"
 
 
-def _get_cache_dir() -> Path:
+def get_cache_dir() -> Path:
     cache_dir = Path(platformdirs.user_cache_dir("oshc"))
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir
 
 
-def _calculate_sha256(filepath: os.PathLike, block_size: int = 65536):
+def calculate_sha256(filepath: os.PathLike, block_size: int = 65536):
     """Calculates the SHA-256 hash of a file."""
     sha256_hash = hashlib.sha256()
     with open(filepath, "rb") as f:
@@ -56,7 +56,7 @@ def _load_config(config_filepath: Path | None = None) -> dict:
         return _merge_with_defaults(config, default_config)
 
 
-def _plot_fuel_type_curve_fits(inv_model, output_filepath, filename: str) -> None:
+def plot_fuel_type_curve_fits(inv_model, output_filepath, filename: str) -> None:
     """
     Plot fuel type curve fits for a given inverse model.
 
@@ -70,12 +70,12 @@ def _plot_fuel_type_curve_fits(inv_model, output_filepath, filename: str) -> Non
         Base filename used in plot titles and file naming
     """
     for fuel_type, _ in inv_model.regression_models.items():
-        model = inv_model._get_model(fuel_type)
+        model = inv_model.get_model(fuel_type)
         bills_temps = inv_model.bills_weather_by_fuel_type_in_btu[fuel_type]
         temps_range = np.linspace(bills_temps["avg_temp"].min(), bills_temps["avg_temp"].max(), 500)
         fig = plt.figure(figsize=(8, 6))
         daily_consumption_pred = model(temps_range)
-        cvrmse = model._calc_cvrmse(bills_temps)
+        cvrmse = model.calc_cvrmse(bills_temps)
         num_params = len(model.parameters)
 
         if num_params == 5:
@@ -115,7 +115,7 @@ def _plot_fuel_type_curve_fits(inv_model, output_filepath, filename: str) -> Non
         plt.close(fig)
 
 
-def _plot_min_penalty(min_penalty, output_filepath, filename):
+def plot_min_penalty(min_penalty, output_filepath, filename):
     plt.figure(figsize=(10, 6))
     plt.plot(min_penalty, label="Min Penalty")
     plt.xlabel("Generation")
@@ -129,7 +129,7 @@ def _plot_min_penalty(min_penalty, output_filepath, filename):
     plt.close()
 
 
-def _plot_avg_penalty(avg_penalty, output_filepath, filename):
+def plot_avg_penalty(avg_penalty, output_filepath, filename):
     plt.figure(figsize=(10, 6))
     plt.plot(avg_penalty, label="Avg Penalty")
     plt.xlabel("Generation")
@@ -143,7 +143,7 @@ def _plot_avg_penalty(avg_penalty, output_filepath, filename):
     plt.close()
 
 
-def _plot_bias_error_series(logbook, output_filepath, filename):
+def plot_bias_error_series(logbook, output_filepath, filename):
     best_bias_series = {}
     for entry in logbook:
         for key, value in entry.items():
@@ -167,7 +167,7 @@ def _plot_bias_error_series(logbook, output_filepath, filename):
     plt.close()
 
 
-def _plot_absolute_error_series(logbook, output_filepath, filename):
+def plot_absolute_error_series(logbook, output_filepath, filename):
     best_abs_series = {}
     for entry in logbook:
         for key, value in entry.items():
@@ -212,7 +212,7 @@ def _plot_absolute_error_series(logbook, output_filepath, filename):
     plt.close()
 
 
-def _get_tmy3_weather():
+def get_tmy3_weather():
     """Download TMY3 weather files from NREL
 
     Parameters
@@ -224,11 +224,11 @@ def _get_tmy3_weather():
     weather_zip_sha256 = "58f5d2821931e235de34a5a7874f040f7f766b46e5e6a4f85448b352de4c8846"
 
     # Download file
-    cache_dir = _get_cache_dir()
+    cache_dir = get_cache_dir()
     weather_zip_filepath = cache_dir / weather_zip_filename
     if not (
         weather_zip_filepath.exists()
-        and _calculate_sha256(weather_zip_filepath) == weather_zip_sha256
+        and calculate_sha256(weather_zip_filepath) == weather_zip_sha256
     ):
         resp = requests.get(weather_files_url, stream=True, timeout=10)
         resp.raise_for_status()

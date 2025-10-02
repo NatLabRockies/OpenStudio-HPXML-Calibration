@@ -87,8 +87,8 @@ def test_calls_modify_hpxml(test_data):
 
     # Catching an AttributeError seems to be the best way to handle missing elements
     try:
-        original_heating_setpoint = original_hpxml._get_building().BuildingDetails.Systems.HVAC.HVACControl.SetpointTempHeatingSeason
-        modified_heating_setpoint = modified_hpxml._get_building().BuildingDetails.Systems.HVAC.HVACControl.SetpointTempHeatingSeason
+        original_heating_setpoint = original_hpxml.get_building().BuildingDetails.Systems.HVAC.HVACControl.SetpointTempHeatingSeason
+        modified_heating_setpoint = modified_hpxml.get_building().BuildingDetails.Systems.HVAC.HVACControl.SetpointTempHeatingSeason
         assert modified_heating_setpoint == original_heating_setpoint + heating_offset
     except AttributeError:
         pass
