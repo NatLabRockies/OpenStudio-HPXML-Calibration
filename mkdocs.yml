@@ -8,6 +8,9 @@ repo_url: https://github.com/NREL/OpenStudio-HPXML-Calibration
 theme:
   name: material
 
+markdown_extensions:
+  - admonition
+
 plugins:
   - search
   # - schema_reader:
