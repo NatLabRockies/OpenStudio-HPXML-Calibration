@@ -2,7 +2,7 @@
 
 The calibration process utilizes a genetic algorithm. The configuration file includes parameters that allow users to tune the genetic algorithm for optimal performance.
 
-- **population_size**: Defines the number of candidate solutions in each generation. A larger population increases diversity and enhances the search, but require more computational resources. Very small populations can reduce the genetic algorith's ability to explore the solution space, potentially preventing it from finding the optimal solution.
+- **population_size**: Defines the number of candidate solutions in each generation. A larger population increases diversity and enhances the search, but require more computational resources. Very small populations can reduce the genetic algorithm's ability to explore the solution space, potentially preventing it from finding the optimal solution.
 - **generations**: Specifies the maximum number of iterations the algorithm can perform. Increasing this value allows more opportunities for improvement, but leads to longer runtimes. The calibration process will terminate early if a solution that meets the user's acceptance criteria is found before reaching this limit.
 - **mutation_probability**: Determines the likelihood of random changes being introduced in offspring. Higher mutation rates encourage exploration of new solutions but may destabilize good candidates.
 - **crossover_probability**: Specifies the probability that two parent solutions will combine to produce a child. Higher crossover rates encourage the exploitation of good solutions; however, excessive rates may reduce overall diversity.
@@ -20,7 +20,7 @@ The calibration process utilizes a genetic algorithm. The configuration file inc
 
 ## Value Choices
 
-These arrays contain the discrete options that the genetic algorithm will evaluate to calibrate the model. Thes values are multipliers of the element values in the hpxml model. 1 means the exact value that is in the original model. 0.1 means 1/10th of the original value. 10 means 10x the original value. Each home should have a custom config file for what is known about that home in particular. For instance, if a blower door test was completed on a home, you could probably have very small or no range for the air leakage choices in that home. We think a safe principle is to start with narrow ranges and few options the first time you attempt calibration of a home.
+These arrays contain the discrete options that the genetic algorithm will evaluate to calibrate the model. The values are multipliers of the element values in the hpxml model. 1 means the exact value that is in the original model. 0.1 means 1/10th of the original value. 10 means 10x the original value. Each home should have a custom config file for what is known about that home in particular. For instance, if a blower door test was completed on a home, you could probably have very small or no range for the air leakage choices in that home. We think a safe principle is to start with narrow ranges and few options the first time you attempt calibration of a home.
 
 - Numbers farther away from 1 signify more uncertainty in the original model.
     - If those settings aren't able to generate a model that meets the acceptance criteria, try expanding the range.
