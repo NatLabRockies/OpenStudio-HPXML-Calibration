@@ -17,3 +17,123 @@ The calibration process utilizes a genetic algorithm. The configuration file inc
     - Higher crossover and mutation probabilities may result in longer search time.
 - **Evaluating Results:** Experiment with different parameter settings and compare outcomes to achieve an optimal balance between solution quality and computational efficiency.
 - **Tune Based on Constraints:** When computational resources are limited, smaller populations, fewer generations, and smaller crossover and mutation probabilities may still yield useful results. It’s often necessary to experiment with different values to find the optimal values for a particular problem.
+
+## Value Choices
+
+These arrays contain the discrete options that the genetic algorithm will evaluate to calibrate the model. Thes values are multipliers of the element values in the hpxml model. 1 means the exact value that is in the original model. 0.1 means 1/10th of the original value. 10 means 10x the original value. Each home should have a custom config file for what is known about that home in particular. For instance, if a blower door test was completed on a home, you could probably have very small or no range for the air leakage choices in that home. We think a safe principle is to start with narrow ranges and few options the first time you attempt calibration of a home.
+
+- Numbers farther away from 1 signify more uncertainty in the original model.
+    - If those settings aren't able to generate a model that meets the acceptance criteria, try expanding the range.
+        - Instead of `[0.5, 1, 2]`, consider `[0.25, 1, 4]`
+- More values inside the array give the genetic algorithm more granularity to find a solution.
+    - If the quality of the output isn't very good, more granularity could help.
+        - Instead of `[0.5, 1, 2]`, consider `[0.5, 0.75, 1, 1.5, 2]`
+
+### The choices in the config file adjust the following hpxml values
+
+If your model doesn't contain any of them, that field is ignored.
+
+### misc_load_multiplier_choices
+
+- plug load
+- fuel load
+- pool pump usage
+- pool heater usage
+- permanent spa pump usage
+- permanent spa heater usage
+
+### air_leakage_multiplier_choices
+
+- air leakage
+- effective leakage area
+
+### heating_efficiency_multiplier_choices
+
+- heating efficiency afue
+- heating efficiency percent
+- heat pump hspf
+- heat pump hspf2
+- heat pump cop
+
+### cooling_efficiency_multiplier_choices
+
+- cooling efficiency seer
+- cooling efficiency seer2
+- cooling efficiency eer
+- cooling efficiency ceer
+- heat pump cooling efficiency seer
+- heat pump cooling efficiency seer2
+- heat pump cooling efficiency eer
+- heat pump cooling efficiency ceer
+
+### roof_r_value_multiplier_choices
+
+- insulation assembly r value
+
+### ceiling_r_value_multiplier_choices
+
+- attic floor insulation assembly r value
+
+### above_ground_walls_r_value_multiplier_choices
+
+- above-ground walls and rim joists assembly r value
+
+### below_ground_walls_r_value_multiplier_choices
+
+- exterior insulation r value
+- interior insulation r value
+- assembly insulation r value
+
+### slab_r_value_multiplier_choices
+
+- under-slab insulation r value
+- slab perimeter insulation r value
+- slab exterior horizontal insulation r value
+- slab gap insulation r value
+
+### floor_r_value_multiplier_choices
+
+- floor insulation assembly r value
+
+### heating_setpoint_offset_choices
+
+- heating setpoint
+- heating setback
+- wekday heating setpoints
+
+### cooling_setpoint_offset_choices
+
+- cooling setpoint
+- cooling setback
+- wekday cooling setpoints
+
+### water_heater_efficiency_multiplier_choices
+
+- water heater energy factor
+- water heater uniform energy factor
+
+### water_fixtures_usage_multiplier_choices
+
+- water fixtures usage
+
+### window_u_factor_multiplier_choices
+
+- window u factor
+
+### window_shgc_multiplier_choices
+
+- window shgc
+
+### appliance_usage_multiplier_choices
+
+- appliance usage
+    - refrigerators
+    - clothes washers
+    - clothes dryers
+    - dishwashers
+    - freezers
+    - cooking ranges
+
+### lighting_load_multiplier_choices
+
+- interior lighting usage
