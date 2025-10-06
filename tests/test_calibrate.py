@@ -169,6 +169,8 @@ def test_calibrate_runs_successfully():
     )
     output_file = TEST_DIR / "calibration_results/ihmh4_test/logbook.json"
     assert output_file.exists()
+    results = json.loads(output_file.read_text())
+    assert results["calibration_success"]
 
 
 def test_calibrate_switches_to_simplified_correctly():
@@ -184,6 +186,8 @@ def test_calibrate_switches_to_simplified_correctly():
     )
     output_file = TEST_DIR / "calibration_results/ihmh5_test/logbook.json"
     assert output_file.exists()
+    results = json.loads(output_file.read_text())
+    assert results["calibration_success"]
 
 
 def test_workflow_with_upgrade():
