@@ -187,7 +187,7 @@ def calibrate(
         Output directory to save results
     num_proc: int
         Number of processors for parallel simulations
-    save_all_results: bool
+    save_all_results: flag
         Whether to save all simulation results.
     verbose: flag
         Enable verbose logging. Repeat flag for more verbosity.
