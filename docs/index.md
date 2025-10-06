@@ -33,7 +33,7 @@ Generate an HPXML model of home energy use, calibrated to utility data.
     - save-all-results: boolean to capture all intermediate steps. Useful for debugging
     - verbose: flag to enable more verbose logging during operation. Can be repeated for increased output
 
-    `oshc calibrate --hpxml-filepath path/to/asdf.xml --config-filepath path/to/qwer.yml --csv-bills-filepath path/to/bcde.csv --output-dir path/to/test_output --num-proc 8 save-all-results True --verbose --verbose`
+    `oshc calibrate --hpxml-filepath path/to/asdf.xml --config-filepath path/to/qwer.yml --csv-bills-filepath path/to/bcde.csv --output-dir path/to/test_output --num-proc 8 --save-all-results --verbose --verbose`
 
 ## Outputs
 
