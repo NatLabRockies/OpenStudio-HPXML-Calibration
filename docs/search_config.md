@@ -2,6 +2,9 @@
 
 The calibration process utilizes a genetic algorithm. The configuration file includes parameters that allow users to tune the genetic algorithm for optimal performance.
 
+!!! note
+    To use the values from the default config file, simply do not include those lines in your custom config file.
+
 - **population_size**: Defines the number of candidate solutions in each generation. A larger population increases diversity and enhances the search, but require more computational resources. Very small populations can reduce the genetic algorithm's ability to explore the solution space, potentially preventing it from finding the optimal solution.
 - **generations**: Specifies the maximum number of iterations the algorithm can perform. Increasing this value allows more opportunities for improvement, but leads to longer runtimes. The calibration process will terminate early if a solution that meets the user's acceptance criteria is found before reaching this limit.
 - **mutation_probability**: Determines the likelihood of random changes being introduced in offspring. Higher mutation rates encourage exploration of new solutions but may destabilize good candidates.
@@ -31,7 +34,7 @@ These arrays contain the discrete options that the genetic algorithm will evalua
 
 ### The choices in the config file adjust the following hpxml values
 
-If your model doesn't contain any of them, that field is ignored.
+If your model doesn't contain any of them, that field is ignored. For instance, if your model doesn't include a permanent spa, calibration will not fail because of that, nor will it create a spa. We hope it behaves the way a reasonable person would expect it to.
 
 ### misc_load_multiplier_choices
 
