@@ -1,10 +1,8 @@
 # Inputs
 
-## [OSW file](https://nrel.github.io/OpenStudio-user-documentation/reference/command_line_interface/#osw-structure) defining the home
+## Utility consumption
 
-An example file can be found at [tests/data/ihmh3_existing_hpxml.osw](https://github.com/NREL/OpenStudio-HPXML-Calibration/blob/main/tests/data/ihmh3_existing_hpxml.osw)
-
-## Utility consumption csv file
+If not included in the hpxml already, we can add it from a csv:
 
 - An example file can be found at [tests/data/test_bills.csv](https://github.com/NREL/OpenStudio-HPXML-Calibration/blob/main/tests/data/test_bills.csv)
 - It has this format:
