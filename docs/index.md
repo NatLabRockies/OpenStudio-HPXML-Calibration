@@ -2,6 +2,8 @@
 
 Generate an HPXML model of home energy use, calibrated to utility data.
 
+<!-- https://mrkeo.github.io/reference/admonitions/ -->
+<!-- https://python-markdown.github.io/extensions/admonition/ -->
 !!! note "Nearly everyone will interact solely with the command line interface"
     Custom workflows can be built using the classes & methods. See the `Code Documentation` section for more information. For advanced users only.
 
