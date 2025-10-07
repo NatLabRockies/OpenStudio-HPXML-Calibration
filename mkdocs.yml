@@ -3,7 +3,7 @@
 
 site_name: OpenStudio HPXML Calibration
 repo_url: https://github.com/NREL/OpenStudio-HPXML-Calibration
-# site_url: https://NREL.github.io/OpenStudio-HPXML-Calibration
+site_url: https://NREL.github.io/OpenStudio-HPXML-Calibration
 
 theme:
   name: material
