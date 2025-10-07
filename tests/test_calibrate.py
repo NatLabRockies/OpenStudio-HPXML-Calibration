@@ -216,6 +216,7 @@ def test_workflow_with_upgrade():
         [
             "calibrate",
             str(existing_hpxml_filepath),
+            "--csv-bills-filepath",
             str(csv_bills_filepath),
             "--output-dir",
             str(cal_output_dir),

@@ -165,8 +165,8 @@ def download_weather(
 @app.command
 def calibrate(
     hpxml_filepath: str,
+    config_filepath: str,
     csv_bills_filepath: str | None = None,
-    config_filepath: str | None = None,
     output_dir: str | None = None,
     num_proc: int | None = None,
     save_all_results: bool = False,
@@ -179,16 +179,16 @@ def calibrate(
     ----------
     hpxml_filepath: str
         Path to the HPXML file
-    csv_bills_filepath: str
-        Optional path to utility bill CSV file
     config_filepath: str
-        Optional path to calibration config file
+        Path to calibration config file
+    csv_bills_filepath: str
+        Path to utility bill CSV file
     output_dir: str
-        Optional output directory to save results
+        Output directory to save results
     num_proc: int
-        Optional number of processors for parallel simulations
-    save_all_results: bool
-        Whether to save all simulation results. Default is False.
+        Number of processors for parallel simulations
+    save_all_results: flag
+        Whether to save all simulation results.
     verbose: flag
         Enable verbose logging. Repeat flag for more verbosity.
     """
@@ -221,11 +221,11 @@ def calibrate(
 
     start = time.time()
     (
-        best_individual_dict,
-        pop,
+        _best_individual_dict,
+        _pop,
         logbook,
-        best_bias_series,
-        best_abs_series,
+        _best_bias_series,
+        _best_abs_series,
         weather_norm_reg_models,
         existing_home_results,
         calibration_success,
