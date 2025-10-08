@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
+      # This environment must be configured in the repo Environment settings
+      # It's configured to publish from the gh-pages branch, set in the repo Pages settings
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
