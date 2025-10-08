@@ -28,4 +28,6 @@ jobs:
           uv version
           uv sync
       - name: Deploy the docs to GitHub Pages
-        run: uv run mkdocs gh-deploy
+        run: |
+          git pull
+          uv run mkdocs gh-deploy
