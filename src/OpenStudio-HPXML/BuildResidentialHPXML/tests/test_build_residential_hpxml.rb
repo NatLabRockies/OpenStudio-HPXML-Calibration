@@ -152,6 +152,8 @@ class BuildResidentialHPXMLTest < Minitest::Test
       'error-ambient-with-garage.xml' => 'base-sfd.xml',
       'error-could-not-find-epw-file.xml' => 'base-sfd.xml',
 
+      'warning-tiny-home-wide-garage.xml' => 'base-sfd.xml',
+      'warning-tiny-home-deep-garage.xml' => 'base-sfd.xml',
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
       'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
       'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml' => 'base-sfd.xml',
@@ -180,6 +182,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
     }
 
     expected_warnings = {
+      'warning-tiny-home-wide-garage.xml' => ['Garage is as wide as the single-family detached unit; garage width reduced from 12 ft to 8.0 ft.',
+                                              'The garage pitch was changed to accommodate garage ridge >= house ridge (from 0.5 to 0.338).'],
+      'warning-tiny-home-deep-garage.xml' => ['Garage is as deep as the single-family detached unit; garage depth reduced from 20 ft to 19.0 ft.',
+                                              'The garage pitch was changed to accommodate garage ridge >= house ridge (from 0.5 to 0.393).'],
       'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml' => ['Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.'],
       'warning-unvented-crawlspace-with-wall-and-ceiling-insulation.xml' => ['Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.'],
       'warning-unconditioned-basement-with-wall-and-ceiling-insulation.xml' => ['Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.'],
@@ -317,18 +323,20 @@ class BuildResidentialHPXMLTest < Minitest::Test
       end
 
       # Check that every property has a description at the end of the file
-      property_names = get_property_names(tsv_name).to_a
-      comment_names = get_comment_rows(tsv_name).to_a
-      puts "  Number of comments: #{comment_names.size}"
+      property_names = get_property_names(tsv_name)
+      property_units = get_property_units(tsv_name)
+      assert(property_names.size == property_units.size)
+      property_descriptions = get_property_descriptions(tsv_name)
+      puts "  Number of property descriptions: #{property_descriptions.size}"
       assert_operator(property_names.size, :>, 0)
-      assert_operator(comment_names.size, :>, 0)
-      missing_comments = property_names - comment_names
-      extra_comments = comment_names - property_names
-      if missing_comments.size > 0
-        "Missing comment description(s) for #{tsv_name}: #{missing_comments.join(',')}."
+      assert_operator(property_descriptions.size, :>, 0)
+      missing_descriptions = property_names - property_descriptions.keys
+      extra_descriptions = property_descriptions.keys - property_names
+      if missing_descriptions.size > 0
+        flunk "Missing property description(s) for #{tsv_name}: #{missing_descriptions.join(',')}."
       end
-      if extra_comments.size > 0
-        "Extra comment description(s) for #{tsv_name}: #{extra_comments.join(',')}."
+      if extra_descriptions.size > 0
+        flunk "Extra property description(s) for #{tsv_name}: #{extra_descriptions.join(',')}."
       end
 
       num_tsvs += 1
@@ -379,7 +387,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
       args['hvac_heating_system'] = 'Central Furnace, 92% AFUE'
       args['hvac_heating_system_capacity'] = '40 kBtu/hr'
       args['hvac_heating_system_heating_load_served'] = '100%'
-      args['hvac_cooling_system'] = 'Central AC, SEER 13.0'
+      args['hvac_cooling_system'] = 'Central AC, SEER2 12.4'
       args['hvac_cooling_system_capacity'] = '2.0 tons'
       args['hvac_cooling_system_cooling_load_served'] = '100%'
       args['hvac_heat_pump'] = 'None'
@@ -468,7 +476,7 @@ class BuildResidentialHPXMLTest < Minitest::Test
     when 'extra-second-heating-system-portable-heater-to-heat-pump.xml'
       args['hvac_heating_system'] = 'None'
       args['hvac_cooling_system'] = 'None'
-      args['hvac_heat_pump'] = 'Central HP, SEER 10.0, HSPF 6.8'
+      args['hvac_heat_pump'] = 'Central HP, SEER2 9.5, HSPF2 5.8'
       args['hvac_heat_pump_backup'] = 'Integrated, Electricity, 100% Efficiency'
       args['hvac_heat_pump_capacity'] = '4.0 tons'
       args['hvac_heat_pump_heating_load_served'] = '75%'
@@ -667,10 +675,10 @@ class BuildResidentialHPXMLTest < Minitest::Test
     case hpxml_file
     when 'error-heating-system-and-heat-pump.xml'
       args['hvac_cooling_system'] = 'None'
-      args['hvac_heat_pump'] = 'Central HP, SEER 10.0, HSPF 6.8'
+      args['hvac_heat_pump'] = 'Central HP, SEER2 9.5, HSPF2 5.8'
     when 'error-cooling-system-and-heat-pump.xml'
       args['hvac_heating_system'] = 'None'
-      args['hvac_heat_pump'] = 'Central HP, SEER 10.0, HSPF 6.8'
+      args['hvac_heat_pump'] = 'Central HP, SEER2 9.5, HSPF2 5.8'
     when 'error-sfd-adiabatic-walls.xml'
       args['geometry_attached_walls'] = '1 Side: Left'
     when 'error-mf-conditioned-basement'
@@ -706,6 +714,14 @@ class BuildResidentialHPXMLTest < Minitest::Test
 
     # Warning
     case hpxml_file
+    when 'warning-tiny-home-wide-garage.xml'
+      args['geometry_unit_conditioned_floor_area'] = '298'
+      args['geometry_unit_type'] = 'Single-Family Detached, 2 Stories'
+      args['geometry_garage_type'] = '1 Car, Left, Fully Protruding'
+    when 'warning-tiny-home-deep-garage.xml'
+      args['geometry_unit_conditioned_floor_area'] = '298'
+      args['geometry_unit_type'] = 'Single-Family Detached, 2 Stories'
+      args['geometry_garage_type'] = '1 Car, Left, Half Protruding'
     when 'warning-vented-crawlspace-with-wall-and-ceiling-insulation.xml'
       args['geometry_foundation_type'] = 'Crawlspace, Vented'
       args['enclosure_floor_over_foundation'] = 'Wood Frame, R-11'

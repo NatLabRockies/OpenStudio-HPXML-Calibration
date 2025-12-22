@@ -68,7 +68,6 @@ These features may require shorter timesteps, allow more sophisticated simulatio
   .. [#] GroundToAirHeatPumpModelType choices are "standard" and "experimental".
   .. [#] Use "standard" for standard ground-to-air heat pump modeling.
          Use "experimental" for an improved model that better accounts for coil staging.
-         The "experimental" ground-to-air heat pump models with desuperheater are not supported yet, see :ref:`water_heater_desuperheater`.
 
 .. _hpxml_emissions_scenarios:
 
@@ -393,16 +392,17 @@ Modeling a whole SFA/MF building is defined in ``/HPXML/SoftwareInfo/extension``
 
 For these simulations:
 
-- An HPXML file with multiple ``Building`` elements is used, where each ``Building`` represents an individual dwelling unit.
+- An HPXML file with multiple ``Building`` elements is used, where each ``Building`` represents an individual dwelling unit. See the ``base-bldgtype-mf-whole-building.xml`` sample file for an example.
 - Unit multipliers (using the ``NumberofUnits`` element; see :ref:`building_construction`) can be specified to model *unique* dwelling units, rather than *all* dwelling units, reducing simulation runtime.
-- Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones. (This may change in the future.)
-- Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit. (This may change in the future.)
-- Energy use for the entire building is calculated; you cannot get energy use for individual dwelling units. (This may change in the future.)
+- Inter-unit heat transfer can be modeled by using the ``SystemIdentifier/@sameas`` attribute on a wall, foundation wall, rim joist, or floor that points to the other corresponding surface. For example, the wall of the second dwelling unit may reference a wall of the first dwelling unit. When the ``@sameas`` attribute is used, no other properties should be specified for that surface. See the ``base-bldgtype-mf-whole-building-inter-unit-heat-transfer.xml`` sample file for an example.
+- Adjacent SFA/MF common spaces are still modeled using assumed temperature profiles, not as separate thermal zones. This may change in the future. (As a workaround, common spaces can be modeled as separate thermal zones by describing them as separate dwelling units -- i.e., ``Building`` elements -- and describing them as "conditioned space" or "basement - conditioned". Each common space can then be described with the full detail allowed for dwelling units -- i.e., HVAC systems, infiltration, lighting, plug loads, etc. Inter-unit heat transfer, particularly between common space units and dwelling units, should be specified as described above. See the ``base-bldgtype-mf-whole-building-common-spaces.xml`` sample file for an example.)
+- Shared systems are still modeled as individual systems, not shared systems connected to multiple dwelling unit. This may change in the future.
+- Energy use for the entire building is calculated; you cannot get energy use for individual dwelling units. This may change in the future.
 
 Notes/caveats about this approach:
 
 - Some inputs (e.g., EPW location or ground conductivity) cannot vary across ``Building`` elements.
-- :ref:`hpxml_batteries` and :ref:`hpxml_vehicles` are not currently supported.
+- :ref:`hpxml_batteries` is not currently supported.
 - :ref:`hpxml_utility_bill_scenarios` using *detailed* :ref:`electricity_rates` are not supported.
 
 .. _building_site:
@@ -1803,13 +1803,13 @@ If a storm window is specified, additional information is entered in ``StormWind
   ============================  ========  ======  ===========  ========  =======  ========================================================
 
   .. [#] GlassType choices are "clear" or "low-e".
-         The ``UFactor`` and ``SHGC`` of the window will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_.
+         The ``UFactor`` and ``SHGC`` of the window will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://www.pnnl.gov/main/publications/external/technical_reports/PNNL-24444.pdf>`_.
+         Note that the correlations may not be accurate for base windows with U-factors below 0.3 due to extrapolation.
 
          \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
 
          \- **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
 
-         Note that a storm window is not allowed for a window with U-factor lower than 0.45.
 
 .. _window_overhangs:
 
@@ -1983,13 +1983,13 @@ If a storm window is specified, additional information is entered in ``StormWind
   ============================  ========  ======  ===========  ========  =======  ========================================================
 
   .. [#] GlassType choices are "clear" or "low-e".
-         The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://labhomes.pnnl.gov/documents/PNNL_24444_Thermal_and_Optical_Properties_Low-E_Storm_Windows_Panels.pdf>`_.
+         The ``UFactor`` and ``SHGC`` of the skylight will be adjusted depending on the ``GlassType``, based on correlations derived using `data reported by PNNL <https://www.pnnl.gov/main/publications/external/technical_reports/PNNL-24444.pdf>`_.
+         Note that the correlations may not be accurate for base windows with U-factors below 0.3 due to extrapolation.
 
          \- **clear storm windows**: U-factor = U-factor of base window - (0.6435 * U-factor of base window - 0.1533); SHGC = 0.9 * SHGC of base window
 
          \- **low-e storm windows**: U-factor = U-factor of base window - (0.766 * U-factor of base window - 0.1532); SHGC = 0.8 * SHGC of base window
 
-         Note that a storm window is not allowed for a skylight with U-factor lower than 0.45.
 
 .. _skylight_curb:
 
@@ -2837,7 +2837,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
 
   .. [#] HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
-  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F nor HeatingDetailedPerformanceData provided, heating capacity fraction at 17F defaults to 0.59 for single/two stage and 0.0329 * HSPF + 0.3996 for variable speed.
+  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F nor HeatingDetailedPerformanceData provided, heating capacity fraction at 17F defaults to 0.626 for single/two stage and 0.69 for variable speed.
   .. [#] The extension/HeatingCapacityFraction17F input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems.
          Either input approach can be used, but not both.
          HeatingCapacityFraction17F is defined as the heating output capacity at 17F divided by the heating output capacity at 47F.
@@ -2873,7 +2873,7 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
          If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
   .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated", otherwise false.
-  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to perfectly temper the cooling delivered during defrost when its capacity is sufficient.
+  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to offset reduced heating capacity during defrost when its capacity is sufficient.
   .. [#] EquipmentType choices are "split system", "packaged system", "small duct high velocity system", or "space constrained system".
 
 .. _hvac_hp_mini_split:
@@ -2933,7 +2933,7 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
 
   .. [#] If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_air` (type: "regular velocity") or :ref:`hvac_distribution_dse`.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
-  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F nor HeatingDetailedPerformanceData provided, heating capacity fraction at 17F defaults to 0.0329 * HSPF + 0.3996.
+  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F nor HeatingDetailedPerformanceData provided, heating capacity fraction at 17F defaults to 0.69.
   .. [#] The extension/HeatingCapacityFraction17F input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems.
          Either input approach can be used, but not both.
          HeatingCapacityFraction17F is defined as the heating output capacity at 17F divided by the heating output capacity at 47F.
@@ -2968,7 +2968,7 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
   .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
          If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
   .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated" and there is an attached distribution system, otherwise false.
-  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to perfectly temper the cooling delivered during defrost when its capacity is sufficient.
+  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to offset reduced heating capacity during defrost when its capacity is sufficient.
 
 .. _hvac_hp_pthp:
 
@@ -3007,7 +3007,7 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
   .. [#] DistributionSystem is only allowed to accommodate attaching a :ref:`vent_fan_cfis` mechanical ventilation system to the ductless HVAC system.
          If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_dse` with a DSE of 1.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
-  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F provided, heating capacity fraction at 17F defaults to 0.59.
+  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F provided, heating capacity fraction at 17F defaults to 0.626.
   .. [#] The extension/HeatingCapacityFraction17F input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems.
          Either input approach can be used, but not both.
          HeatingCapacityFraction17F is defined as the heating output capacity at 17F divided by the heating output capacity at 47F.
@@ -3020,7 +3020,7 @@ Each packaged terminal heat pump is entered as a ``/HPXML/Building/BuildingDetai
          Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
-  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to perfectly temper the cooling delivered during defrost when its capacity is sufficient.
+  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to offset reduced heating capacity during defrost when its capacity is sufficient.
 
 .. _hvac_hp_room_ac_reverse_cycle:
 
@@ -3059,7 +3059,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
   .. [#] DistributionSystem is only allowed to accommodate attaching a :ref:`vent_fan_cfis` mechanical ventilation system to the ductless HVAC system.
          If DistributionSystem provided, HVACDistribution type must be :ref:`hvac_distribution_dse` with a DSE of 1.
   .. [#] Heating capacity autosized per ACCA Manual J/S based on heating design load (unless a different HeatPumpSizingMethodology was selected in :ref:`hvac_sizing_control`).
-  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F provided, heating capacity fraction at 17F defaults to 0.59.
+  .. [#] If neither HeatingCapacity17F nor extension/HeatingCapacityFraction17F provided, heating capacity fraction at 17F defaults to 0.626.
   .. [#] The extension/HeatingCapacityFraction17F input is a more flexible alternative to HeatingCapacity17F, as it can apply to autosized systems.
          Either input approach can be used, but not both.
          HeatingCapacityFraction17F is defined as the heating output capacity at 17F divided by the heating output capacity at 47F.
@@ -3072,7 +3072,7 @@ Each room air conditioner with reverse cycle is entered as a ``/HPXML/Building/B
          Additional backup inputs are described in :ref:`hvac_hp_backup`.
   .. [#] The sum of all ``FractionHeatLoadServed`` (across all HVAC systems) must be less than or equal to 1.
   .. [#] The sum of all ``FractionCoolLoadServed`` (across all HVAC systems) must be less than or equal to 1.
-  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to perfectly temper the cooling delivered during defrost when its capacity is sufficient.
+  .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to offset reduced heating capacity during defrost when its capacity is sufficient.
 
 .. _hvac_hp_ground_to_air:
 
@@ -4196,26 +4196,28 @@ Heat Pump
 
 Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem``.
 
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
-  Element                                        Type              Units          Constraints             Required  Default         Notes
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
-  ``SystemIdentifier``                           id                                                       Yes                       Unique identifier
-  ``FuelType``                                   string                           electricity             Yes                       Fuel type
-  ``WaterHeaterType``                            string                           heat pump water heater  Yes                       Type of water heater
-  ``Location``                                   string                           See [#]_                No        See [#]_        Water heater location
-  ``IsSharedSystem``                             boolean                                                  No        false           Whether it serves multiple dwelling units or shared laundry room
-  ``TankVolume``                                 double            gal            > 0                     No        See [#]_        Nominal tank volume
-  ``FractionDHWLoadServed``                      double            frac           >= 0, <= 1 [#]_         Yes                       Fraction of hot water load served [#]_
-  ``HeatingCapacity``                            double            Btu/hr         > 0                     No        See [#]_        Heating output capacity
-  ``BackupHeatingCapacity``                      double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
-  ``UniformEnergyFactor`` or ``EnergyFactor``    double            frac           > 1, <= 5               Yes                       EnergyGuide label rated efficiency
-  ``HPWHOperatingMode``                          string                           See [#]_                No        hybrid/auto     Operating mode [#]_
-  ``UsageBin`` or ``FirstHourRating``            string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
-  ``WaterHeaterInsulation/Jacket/JacketRValue``  double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
-  ``HotWaterTemperature``                        double            F              > 0                     No        125             Water heater setpoint [#]_
-  ``UsesDesuperheater``                          boolean                                                  No        false           Presence of desuperheater? [#]_
-  ``extension/NumberofBedroomsServed``           integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
-  =============================================  ================  =============  ======================  ========  ==============  =============================================
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
+  Element                                              Type              Units          Constraints             Required  Default         Notes
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
+  ``SystemIdentifier``                                 id                                                       Yes                       Unique identifier
+  ``FuelType``                                         string                           electricity             Yes                       Fuel type
+  ``WaterHeaterType``                                  string                           heat pump water heater  Yes                       Type of water heater
+  ``Location``                                         string                           See [#]_                No        See [#]_        Water heater location
+  ``IsSharedSystem``                                   boolean                                                  No        false           Whether it serves multiple dwelling units or shared laundry room
+  ``TankVolume``                                       double            gal            > 0                     No        See [#]_        Nominal tank volume
+  ``FractionDHWLoadServed``                            double            frac           >= 0, <= 1 [#]_         Yes                       Fraction of hot water load served [#]_
+  ``HeatingCapacity``                                  double            Btu/hr         > 0                     No        See [#]_        Heating output capacity
+  ``BackupHeatingCapacity``                            double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
+  ``UniformEnergyFactor`` or ``EnergyFactor``          double            frac           > 1, <= 5               Yes                       EnergyGuide label rated efficiency
+  ``HPWHOperatingMode``                                string                           See [#]_                No        hybrid/auto     Operating mode [#]_
+  ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
+  ``WaterHeaterInsulation/Jacket/JacketRValue``        double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
+  ``HotWaterTemperature``                              double            F              > 0                     No        125             Water heater setpoint [#]_
+  ``UsesDesuperheater``                                boolean                                                  No        false           Presence of desuperheater? [#]_
+  ``extension/NumberofBedroomsServed``                 integer                          > NumberofBedrooms      See [#]_                  Number of bedrooms served directly or indirectly
+  ``extension/HPWHInConfinedSpaceWithoutMitigation``   boolean                                                  No        false           Whether HPWH is installed in confined space without mitigation [#]_
+  ``extension/HPWHContainmentVolume``                  double            ft3            > 0                     See [#]_                  Containment volume of the space where HPWH is installed
+  ===================================================  ================  =============  ======================  ========  ==============  =============================================
 
   .. [#] Location choices are "conditioned space", "basement - unconditioned", "basement - conditioned", "attic - unvented", "attic - vented", "garage", "crawlspace - unvented", "crawlspace - vented", "crawlspace - conditioned", "other exterior", "other housing unit", "other heated space", "other multifamily buffer space", or "other non-freezing space".
          See :ref:`hpxml_locations` for descriptions.
@@ -4246,6 +4248,13 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] NumberofBedroomsServed only required if IsSharedSystem is true.
          Tank losses will be apportioned to the dwelling unit using its number of bedrooms divided by the total number of bedrooms served by the water heating system per `ANSI/RESNET/ICC 301-2022 <https://codes.iccsafe.org/content/RESNET3012022P1>`_.
          Each dwelling unit w/zero bedrooms should be counted as 1 bedroom -- e.g., a value of 3 should be entered for a shared system serving 3 studio (zero bedroom) apartments.
+  .. [#] Mitigation approaches include sufficient enclosed volume or connection to conditioned space with, e.g, ducting, grills, door undercuts, or louvers.
+         If true, a COP adjustment based on ``extension/HPWHContainmentVolume`` will be applied per `RESNET HERS Addendum 77 <https://www.resnet.us/about/standards/hers/draft-pds-03-hers-addendum-77-integrated-heat-pump-water-heaters-ihpwh/>`_.
+         The adjustment accounts for the reduced heat pump performance due to colder localized temperatures as well as the increased likelihood of electric resistance backup operation.
+         The adjustment is based on `Heat Pump Water Heaters in Small Spaces Lab Testing: “The Amazing Shrinking Room” <https://neea.org/wp-content/uploads/2025/03/Heat-Pump-Water-Heaters-in-Small-Spaces-Lab-Testing.pdf>`_, which measured data for a 240V HPWH operating in hybrid mode in conditioned space with a 4.5 kW backup element enabled.
+         For space volumes below 450 ft3, the calculated effective COP may be different than what is seen in practice for HPWHs that do not have backup electric resistance elements or have element capacities significantly different than 4.5 kW.
+         For HPWHs installed in unconditioned confined spaces (e.g., closet in an unconditioned basement), this COP adjustment may not accurately account for the air temperature impact.
+  .. [#] HPWHContainmentVolume only required if HPWHInConfinedSpaceWithoutMitigation is true.
 
 .. _water_heater_combi_storage:
 
@@ -4343,8 +4352,6 @@ If the water heater uses a desuperheater, additional information is entered in `
   .. warning::
 
     A desuperheater is currently not allowed if detailed water heater setpoint schedules are used.
-
-    A desuperheater is currently not allowed if ``GroundToAirHeatPumpModelType`` is "experimental", see :ref:`hpxml_simulation_control`.
 
 HPXML Hot Water Distribution
 ****************************
@@ -4596,7 +4603,7 @@ A simple solar hot water system is entered as a ``/HPXML/Building/BuildingDetail
   ====================  =======  =====  ============  ========  ========  ======================
 
   .. [#] Portion of total conventional hot water heating load (delivered energy plus tank standby losses).
-         Can be obtained from `Directory of SRCC OG-300 Solar Water Heating System Ratings <https://solar-rating.org/programs/og-300-program/>`_ or NREL's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
+         Can be obtained from `Directory of SRCC OG-300 Solar Water Heating System Ratings <https://solar-rating.org/programs/og-300-program/>`_ or NLR's `System Advisor Model <https://sam.nrel.gov/>`_ or equivalent.
   .. [#] ConnectedTo must reference a ``WaterHeatingSystem``.
          The referenced water heater cannot be a space-heating boiler nor attached to a desuperheater.
   .. [#] If ConnectedTo not provided, solar fraction will apply to all water heaters in the building.

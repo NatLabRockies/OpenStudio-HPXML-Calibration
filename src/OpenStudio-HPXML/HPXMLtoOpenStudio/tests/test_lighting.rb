@@ -12,12 +12,13 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
-    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+    @tmp_hpxml_path = File.join(File.dirname(__FILE__), 'tmp.xml')
+    @schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', 'resources', 'hpxml_schema', 'HPXML.xsd'))
+    @schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', 'resources', 'hpxml_schematron', 'EPvalidator.sch'))
   end
 
   def teardown
-    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    cleanup_results_files
+    cleanup_output_files([@tmp_hpxml_path])
   end
 
   def get_kwh_per_year(model, name)
@@ -188,9 +189,26 @@ class HPXMLtoOpenStudioLightingTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
+    hpxml_defaults_path = File.join(File.dirname(__FILE__), 'in.xml')
+    if args_hash['hpxml_path'] == @tmp_hpxml_path
+      # Since there is a penalty to performing schema/schematron validation, we only do it for custom models
+      # Sample files already have their in.xml's checked in the workflow tests
+      schema_validator = @schema_validator
+      schematron_validator = @schematron_validator
+    else
+      schema_validator = nil
+      schematron_validator = nil
+    end
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator)
+    if not hpxml.errors.empty?
+      puts 'ERRORS:'
+      hpxml.errors.each do |error|
+        puts error
+      end
+      flunk "Validation error(s) in #{hpxml_defaults_path}."
+    end
 
-    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
+    File.delete(hpxml_defaults_path)
 
     return model, hpxml, hpxml.buildings[0]
   end

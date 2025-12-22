@@ -34,6 +34,7 @@ OpenStudio-HPXML capabilities include:
 - Schematron and XSD Schema input validation
 - Can be used for [DOE HOMES program approval](https://www.energy.gov/scep/single-family-modeling-solutions-home-efficiency-rebates-program)
 - Can be used for [ACCA Manual J approval](https://www.acca.org/standards/approved-software)
+- Can be used for [automated calibration to utility bills](https://github.com/NREL/OpenStudio-HPXML-calibration)
 
 ## Measures
 
@@ -48,11 +49,13 @@ This repository contains several OpenStudio measures:
 
 OpenStudio-HPXML is used by a number of software products or organizations, including:
 
-- [BEopt](https://beopt.nrel.gov)
+- [BEopt](https://www.nrel.gov/buildings/beopt)
 - [Clarity Heat Pump Toolkit](https://psdconsulting.com/solutions/)
 - [Energy Rating Index (ERI)](https://github.com/NREL/OpenStudio-ERI)
 - [Home Energy Score](https://www.homeenergyscore.gov)
+- [ICF](https://www.icf.com/work/utilities/sightline-utility-customer-programs)
 - [OptiMiser](https://optimiserenergy.com)
+- [Pearl](https://pearlscore.com)
 - [Radiant Labs](https://www.radiantlabs.co)
 - [ResStock](https://resstock.nrel.gov/)
 - [URBANopt](https://www.nrel.gov/buildings/urbanopt.html)

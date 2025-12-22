@@ -12,12 +12,13 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
   def setup
     @root_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', '..'))
     @sample_files_path = File.join(@root_path, 'workflow', 'sample_files')
-    @tmp_hpxml_path = File.join(@sample_files_path, 'tmp.xml')
+    @tmp_hpxml_path = File.join(File.dirname(__FILE__), 'tmp.xml')
+    @schema_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', 'resources', 'hpxml_schema', 'HPXML.xsd'))
+    @schematron_validator = XMLValidator.get_xml_validator(File.join(File.dirname(__FILE__), '..', 'resources', 'hpxml_schematron', 'EPvalidator.sch'))
   end
 
   def teardown
-    File.delete(@tmp_hpxml_path) if File.exist? @tmp_hpxml_path
-    cleanup_results_files
+    cleanup_output_files([@tmp_hpxml_path])
   end
 
   def _get_table_lookup_factor(curve, t1, t2)
@@ -872,7 +873,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for rated speed
     expected_clg_cop_95 = 4.09
     expected_clg_capacity_95 = 11040
-    expected_htg_cop_47 = 3.38
+    expected_htg_cop_47 = 3.31
     expected_htg_capacity_47 = 10077
     expected_c_d = 0.08
 
@@ -1004,7 +1005,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for [min, rated] speeds
     expected_clg_cops_95 = [4.68, 4.52]
     expected_clg_capacities_95 = [7806, 10851]
-    expected_htg_cops_47 = [4.27, 3.73]
+    expected_htg_cops_47 = [4.14, 3.61]
     expected_htg_capacities_47 = [7394, 10250]
     expected_c_d = 0.08
 
@@ -1067,7 +1068,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for [min, rated, max] speeds
     expected_clg_cops_95 = [6.51, 4.45, 4.17]
     expected_clg_capacities_95 = [2655, 10819, 11620]
-    expected_htg_cops_47 = [4.34, 3.61, 3.42]
+    expected_htg_cops_47 = [4.52, 3.77, 3.57]
     expected_htg_capacities_47 = [3151, 10282, 11269]
     expected_c_d = 0.4
 
@@ -1330,7 +1331,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for [min, rated, max] speeds
     expected_clg_cops_95 = [5.67, 3.97, 3.71]
     expected_clg_capacities_95 = [2838, 10709, 11490]
-    expected_htg_cops_47 = [4.28, 3.47, 3.27]
+    expected_htg_cops_47 = [4.37, 3.55, 3.35]
     expected_htg_capacities_47 = [3156, 10392, 11408]
     expected_c_d = 0.4
 
@@ -1390,7 +1391,7 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # Values for [min, rated, max] speeds
     expected_clg_cops_95 = [5.35, 4.11, 3.85]
     expected_clg_capacities_95 = [2957, 10819, 11620]
-    expected_htg_cops_47 = [4.04, 3.34, 3.15]
+    expected_htg_cops_47 = [4.12, 3.41, 3.22]
     expected_htg_capacities_47 = [3151, 10282, 11269]
     expected_c_d = 0.4
 
@@ -2260,9 +2261,26 @@ class HPXMLtoOpenStudioHVACTest < Minitest::Test
     # assert that it ran correctly
     assert_equal('Success', result.value.valueName)
 
-    hpxml = HPXML.new(hpxml_path: File.join(File.dirname(__FILE__), 'in.xml'))
+    hpxml_defaults_path = File.join(File.dirname(__FILE__), 'in.xml')
+    if args_hash['hpxml_path'] == @tmp_hpxml_path
+      # Since there is a penalty to performing schema/schematron validation, we only do it for custom models
+      # Sample files already have their in.xml's checked in the workflow tests
+      schema_validator = @schema_validator
+      schematron_validator = @schematron_validator
+    else
+      schema_validator = nil
+      schematron_validator = nil
+    end
+    hpxml = HPXML.new(hpxml_path: hpxml_defaults_path, schema_validator: schema_validator, schematron_validator: schematron_validator)
+    if not hpxml.errors.empty?
+      puts 'ERRORS:'
+      hpxml.errors.each do |error|
+        puts error
+      end
+      flunk "Validation error(s) in #{hpxml_defaults_path}."
+    end
 
-    File.delete(File.join(File.dirname(__FILE__), 'in.xml'))
+    File.delete(hpxml_defaults_path)
 
     return model, hpxml, hpxml.buildings[0]
   end
