@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.2'>
+<HPXML xmlns='http://hpxmlonline.com/2025/12' schemaVersion='5.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>BEopt</XMLGeneratedBy>
@@ -714,7 +714,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -870,7 +870,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -930,7 +930,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.82</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall16Insulation'/>
@@ -951,7 +951,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.82</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall17Insulation'/>
@@ -1066,7 +1066,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1095,7 +1095,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1124,7 +1124,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1153,7 +1153,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1182,7 +1182,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>3.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1211,7 +1211,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1240,7 +1240,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>6.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1269,7 +1269,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>3.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1298,7 +1298,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>3.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1327,7 +1327,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>3.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -2382,13 +2382,13 @@
       <Pools>
         <Pool>
           <SystemIdentifier id='Pool'/>
-          <Type>none</Type>
+          <Type>not present</Type>
         </Pool>
       </Pools>
       <Spas>
         <PermanentSpa>
           <SystemIdentifier id='PermanentSpa'/>
-          <Type>none</Type>
+          <Type>not present</Type>
         </PermanentSpa>
       </Spas>
       <MiscLoads>

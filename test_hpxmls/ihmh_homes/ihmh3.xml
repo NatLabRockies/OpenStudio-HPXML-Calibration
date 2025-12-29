@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.2'>
+<HPXML xmlns='http://hpxmlonline.com/2025/12' schemaVersion='5.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>BEopt</XMLGeneratedBy>
@@ -204,7 +204,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
@@ -225,7 +225,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
@@ -246,7 +246,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -274,7 +274,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
@@ -583,7 +583,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall14Insulation'/>
@@ -604,7 +604,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall15Insulation'/>
@@ -625,7 +625,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall16Insulation'/>
