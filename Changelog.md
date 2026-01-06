@@ -32,6 +32,7 @@ __New Features__
   - Allows modeling detailed electric vehicles.
   - Documents a workaround for modeling common spaces (conditioned or unconditioned).
   - See the [documentation](https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#whole-sfa-mf-buildings) for more information.
+- Adds Electric Panel Load: Max Current Rating (A) output to results_panel.csv.
 
 __Bugfixes__
 - Fixes ground-source heat pump plant loop fluid type (workaround for OpenStudio bug).
@@ -43,6 +44,7 @@ __Bugfixes__
 - Fixes possible errors when small water flow rates for variable-speed experimental ground-source heat pump model.
 - Fixes possible ground-source heat pump sizing error if the heating or cooling design temperature differences are zero.
 - Fixes EMS discharge power program and assignment of default discharging schedule for detailed electric vehicles.
+- Adds error-checking for when `HeatPump/HeatingCapacity17F` is provided but `HeatPump/HeatingCapacity` is not.
 
 ## OpenStudio-HPXML v1.10.0
 
