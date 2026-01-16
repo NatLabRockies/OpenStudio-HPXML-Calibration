@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.2'>
+<HPXML xmlns='http://hpxmlonline.com/2025/12' schemaVersion='5.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>BEopt</XMLGeneratedBy>
@@ -509,7 +509,7 @@
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall9Insulation'/>
@@ -530,7 +530,7 @@
             <SolarAbsorptance>0.75</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall10Insulation'/>
@@ -549,7 +549,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -578,7 +578,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -607,7 +607,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -636,7 +636,7 @@
             <Thickness>8.0</Thickness>
             <DepthBelowGrade>7.0</DepthBelowGrade>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
               <Thickness>0.0</Thickness>
             </InteriorFinish>
             <Insulation>
@@ -1512,13 +1512,13 @@
       <Pools>
         <Pool>
           <SystemIdentifier id='Pool'/>
-          <Type>none</Type>
+          <Type>not present</Type>
         </Pool>
       </Pools>
       <Spas>
         <PermanentSpa>
           <SystemIdentifier id='PermanentSpa'/>
-          <Type>none</Type>
+          <Type>not present</Type>
         </PermanentSpa>
       </Spas>
       <MiscLoads>

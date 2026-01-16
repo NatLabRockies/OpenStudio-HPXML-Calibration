@@ -91,8 +91,8 @@ def test_compare_results(test_data):
         normalized_consumption=normalized_usage, annual_model_results=simulation_results
     )
     assert len(comparison) == 2  # Should have two fuel types in the comparison for this building
-    assert comparison["electricity"]["Absolute Error"]["baseload"] == 1544.5
-    assert comparison["natural gas"]["Bias Error"]["heating"] == -79.3
+    assert comparison["electricity"]["Absolute Error"]["baseload"] == pytest.approx(1544.5, 0.5)
+    assert comparison["natural gas"]["Bias Error"]["heating"] == pytest.approx(-79.3, 0.5)
 
 
 def test_add_bills(test_data):

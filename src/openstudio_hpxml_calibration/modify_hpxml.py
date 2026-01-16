@@ -7,16 +7,14 @@ from lxml.builder import ElementMaker
 
 from openstudio_hpxml_calibration.hpxml import HpxmlDoc
 
-# Define HPXML namespace
-NS = "http://hpxmlonline.com/2023/09"
-NSMAP = {None: NS}
-
-# Define the element maker with namespace
-E = ElementMaker(namespace=NS, nsmap=NSMAP)
-
 
 def set_consumption_on_hpxml(hpxml_object: HpxmlDoc, csv_bills_filepath: Path) -> HpxmlDoc:
-    """Add bills from csv to hpxml object"""
+    # Define HPXML namespace
+    NS = hpxml_object.ns["h"]
+    NSMAP = {None: NS}
+
+    # Define the element maker with namespace
+    E = ElementMaker(namespace=NS, nsmap=NSMAP)
 
     bills = pd.read_csv(csv_bills_filepath)
     # Convert to datetimes, and include the final day of the bill period

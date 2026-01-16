@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.2'>
+<HPXML xmlns='http://hpxmlonline.com/2025/12' schemaVersion='5.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>redacted</XMLGeneratedBy>
@@ -218,7 +218,7 @@
             <SHGC>0.52</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='exterior-shading-0'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='interior-shading-0'/>
@@ -247,7 +247,7 @@
             <SHGC>0.52</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='exterior-shading-1'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='interior-shading-1'/>
@@ -276,7 +276,7 @@
             <SHGC>0.52</SHGC>
             <ExteriorShading>
               <SystemIdentifier id='exterior-shading-2'/>
-              <Type>none</Type>
+              <Type>not present</Type>
             </ExteriorShading>
             <InteriorShading>
               <SystemIdentifier id='interior-shading-2'/>
@@ -570,7 +570,7 @@
       <Pools>
         <Pool>
           <SystemIdentifier id='Pool'/>
-          <Type>none</Type>
+          <Type>not present</Type>
         </Pool>
       </Pools>
       <MiscLoads>

@@ -459,7 +459,7 @@ module HVAC
     if is_heatpump
       ems_program = apply_defrost_ems_program(model, htg_coil, control_zone.spaces[0], cooling_system, hpxml_bldg.building_construction.number_of_units)
       if cooling_system.pan_heater_watts.to_f > 0
-        apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, hvac_unavailable_periods[:htg])
+        apply_pan_heater_ems_program(model, ems_program, htg_coil, control_zone.spaces[0], cooling_system, htg_ap.hp_min_temp, hvac_unavailable_periods[:htg])
       end
     end
     return air_loop
@@ -824,11 +824,6 @@ module HVAC
     plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert)
     plant_loop.addDemandBranchForComponent(htg_coil)
     plant_loop.addDemandBranchForComponent(clg_coil)
-
-    # FIXME: Workaround for https://github.com/NREL/OpenStudio/issues/5458
-    # Set the fluid type again because plant_loop.addSupplyBranchForComponent(ground_heat_exch_vert) resets it to Water
-    # Remove the following line if the above issue is addressed
-    plant_loop.setFluidType(hp_ap.fluid_type)
 
     sizing_plant = plant_loop.sizingPlant
     sizing_plant.setLoopType('Condenser')
@@ -2042,6 +2037,7 @@ module HVAC
     )
     pump_program.addLine("If #{htg_load_sensor.name} > 0.0 && #{clg_load_sensor.name} > 0.0") # Heating loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{htg_load_sensor.name}) / #{htg_coil.ratedHeatingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
+    pump_program.addLine('  Set estimated_plr = @Max estimated_plr 0.1') # Avoid small water flow rate, which causes E+ failures
     pump_program.addLine("  Set max_vfr_htg = #{htg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
     pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_htg')
     pump_program.addLine("  If estimated_vfr < #{htg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
@@ -2051,6 +2047,7 @@ module HVAC
     pump_program.addLine('  EndIf')
     pump_program.addLine("ElseIf #{htg_load_sensor.name} < 0.0 && #{clg_load_sensor.name} < 0.0") # Cooling loads
     pump_program.addLine("  Set estimated_plr = (@ABS #{clg_load_sensor.name}) / #{clg_coil.grossRatedTotalCoolingCapacityAtSelectedNominalSpeedLevel}") # Use nominal capacity for estimation
+    pump_program.addLine('  Set estimated_plr = @Max estimated_plr 0.1') # Avoid small water flow rate, which causes E+ failures
     pump_program.addLine("  Set max_vfr_clg = #{clg_coil.ratedWaterFlowRateAtSelectedNominalSpeedLevel}")
     pump_program.addLine('  Set estimated_vfr = estimated_plr * max_vfr_clg')
     pump_program.addLine("  If estimated_vfr < #{clg_coil.speeds[0].referenceUnitRatedWaterFlowRate}") # Actuate the water flow rate below first stage
@@ -4658,9 +4655,10 @@ module HVAC
   # @param htg_coil [OpenStudio::Model::CoilHeatingDXSingleSpeed or OpenStudio::Model::CoilHeatingDXMultiSpeed] OpenStudio Heating Coil object
   # @param conditioned_space [OpenStudio::Model::Space] OpenStudio Space object for conditioned zone
   # @param heat_pump [HPXML::HeatPump] The HPXML heat pump of interest
+  # @param hp_min_temp [Double] Minimum heat pump compressor operating temperature for heating
   # @param heating_unavailable_periods [HPXML::UnavailablePeriods] Unavailable periods for heating
   # @return [nil]
-  def self.apply_pan_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, heating_unavailable_periods)
+  def self.apply_pan_heater_ems_program(model, ems_program, htg_coil, conditioned_space, heat_pump, hp_min_temp, heating_unavailable_periods)
     # Other equipment/actuator
     cnt = model.getOtherEquipments.count { |e| e.endUseSubcategory.start_with? Constants::ObjectTypePanHeater } # Ensure unique meter for each heat pump
     pan_heater_energy_oe = Model.add_other_equipment(
@@ -4696,15 +4694,18 @@ module HVAC
     end
 
     # EMS program
-    if htg_avail_sensor.nil?
-      ems_program.addLine("If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')})")
-    else # Don't run pan heater during heating unavailable period
-      ems_program.addLine("If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (#{htg_avail_sensor.name} == 1)")
+    temp_criteria = "If (T_out <= #{UnitConversions.convert(32.0, 'F', 'C')}) && (T_out >= #{UnitConversions.convert(hp_min_temp, 'F', 'C').round(2)})"
+    if not htg_avail_sensor.nil?
+      # Don't run pan heater during heating unavailable period either
+      temp_criteria += " && (#{htg_avail_sensor.name} == 1)"
     end
+    ems_program.addLine(temp_criteria)
     if heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeContinuous
       ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = #{heat_pump.pan_heater_watts}")
     elsif heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeDefrost
       ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = fraction_defrost * #{heat_pump.pan_heater_watts}")
+    elsif heat_pump.pan_heater_control_type == HPXML::HVACPanHeaterControlTypeHeatPump
+      ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = fraction_heating * #{heat_pump.pan_heater_watts}")
     end
     ems_program.addLine('Else')
     ems_program.addLine("  Set #{pan_heater_energy_oe_act.name} = 0.0")
@@ -4818,23 +4819,24 @@ module HVAC
     program.addLine('Set F_defrost = 0.134 - (0.003 * ((T_out * 1.8) + 32))')
     program.addLine('Set F_defrost = @Min F_defrost 0.08')
     program.addLine('Set F_defrost = @Max F_defrost 0')
-    program.addLine("Set #{frost_cap_multiplier_act.name} = 1.0 - 1.8 * F_defrost")
-    program.addLine("Set #{frost_pow_multiplier_act.name} = 1.0 - 0.3 * F_defrost")
+    program.addLine("Set #{frost_cap_multiplier_act.name} = 1.0 - (1.8 * F_defrost)")
+    program.addLine("Set #{frost_pow_multiplier_act.name} = 1.0 - (0.3 * F_defrost)")
     program.addLine("If T_out <= #{max_oat_defrost}")
-    program.addLine('  Set fraction_compressor_htg = 1.0 - F_defrost')
-    # Steady state compressor runtime fraction including heating cycle and defrost cycle
-    program.addLine("  Set fraction_compressor_ss = #{htg_coil_rtf_sensor.name} * #{frost_cap_multiplier_act.name} / fraction_compressor_htg")
-    program.addLine('  Set fraction_defrost = F_defrost * (@Max 1.0 fraction_compressor_ss)')
-    program.addLine("  If #{htg_coil_rtf_sensor.name} > 0")
-    program.addLine("    Set q_dot_defrost = (fraction_compressor_htg * (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name}) - #{htg_coil_htg_rate_sensor.name}) / #{unit_multiplier} / fraction_defrost")
+    program.addLine('  Set F_compressor = 1.0 - F_defrost')
+    program.addLine("  Set fraction_heating = #{htg_coil_rtf_sensor.name}")
+    program.addLine('  Set fraction_defrost = F_defrost * fraction_heating') # Defrost fraction with RTF
+    program.addLine('  If fraction_heating > 0') # Heating rate from sensors has RTF applied already, use F_compressor
+    program.addLine("    Set q_dot_defrost = ((F_compressor * (#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name}) - #{htg_coil_htg_rate_sensor.name}) / fraction_defrost) / #{unit_multiplier}")
+    program.addLine("    Set reduced_cap = (((#{htg_coil_htg_rate_sensor.name} / #{frost_cap_multiplier_act.name}) - #{htg_coil_htg_rate_sensor.name}) / fraction_defrost) / #{unit_multiplier}")
     program.addLine('  Else')
     program.addLine('    Set q_dot_defrost = 0.0')
+    program.addLine('    Set reduced_cap = 0.0')
     program.addLine('  EndIf')
     program.addLine("  Set supp_capacity = #{supp_sys_capacity}")
     program.addLine("  Set supp_efficiency = #{supp_sys_efficiency}")
-    program.addLine('  Set supp_delivered_htg = @Min q_dot_defrost supp_capacity')
+    program.addLine('  Set supp_delivered_htg = @Min reduced_cap supp_capacity')
     program.addLine('  If supp_efficiency > 0.0')
-    program.addLine('    Set supp_design_level = supp_delivered_htg / supp_efficiency') # Assume perfect tempering
+    program.addLine('    Set supp_design_level = (supp_delivered_htg / supp_efficiency)') # Assume perfect tempering
     program.addLine('  Else')
     program.addLine('    Set supp_design_level = 0.0')
     program.addLine('  EndIf')

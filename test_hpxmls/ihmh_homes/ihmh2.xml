@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<HPXML xmlns='http://hpxmlonline.com/2023/09' schemaVersion='4.2'>
+<HPXML xmlns='http://hpxmlonline.com/2025/12' schemaVersion='5.0'>
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>BEopt</XMLGeneratedBy>
@@ -229,7 +229,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -252,9 +252,9 @@
             </WallType>
             <Area>152.0</Area>
             <Azimuth>45</Azimuth>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
@@ -275,7 +275,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
@@ -296,7 +296,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall4Insulation'/>
@@ -317,7 +317,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -345,7 +345,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -405,7 +405,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -492,7 +492,7 @@
             </WallType>
             <Area>256.0</Area>
             <Azimuth>45</Azimuth>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -735,7 +735,7 @@
             </WallType>
             <Area>272.0</Area>
             <Azimuth>225</Azimuth>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -882,7 +882,7 @@
             </WallType>
             <Area>256.0</Area>
             <Azimuth>45</Azimuth>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -970,7 +970,7 @@
               <Spacing>16.0</Spacing>
               <FramingFactor>0.25</FramingFactor>
             </Studs>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -1025,7 +1025,7 @@
             </WallType>
             <Area>272.0</Area>
             <Azimuth>225</Azimuth>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
               <Type>gypsum board</Type>
               <Thickness>0.5</Thickness>
@@ -1108,9 +1108,9 @@
             </WallType>
             <Area>16.0</Area>
             <Azimuth>45</Azimuth>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall32Insulation'/>
@@ -1126,9 +1126,9 @@
             </WallType>
             <Area>17.0</Area>
             <Azimuth>225</Azimuth>
-            <Siding>none</Siding>
+            <Siding>not present</Siding>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall33Insulation'/>
@@ -1149,7 +1149,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall34Insulation'/>
@@ -1234,7 +1234,7 @@
             <SolarAbsorptance>0.3</SolarAbsorptance>
             <Emittance>0.9</Emittance>
             <InteriorFinish>
-              <Type>none</Type>
+              <Type>not present</Type>
             </InteriorFinish>
             <Insulation>
               <SystemIdentifier id='Wall37Insulation'/>
@@ -1989,7 +1989,7 @@
           </Pumps>
           <Heater>
             <SystemIdentifier id='PoolHeater'/>
-            <Type>none</Type>
+            <Type>not present</Type>
           </Heater>
         </Pool>
       </Pools>
