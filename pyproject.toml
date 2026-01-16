@@ -1,13 +1,13 @@
 [project]
 name = "openstudio-hpxml-calibration"
-version = "0.1.0"
+version = "0.2.0"
 description = "Calibrates a residential building energy model to utility bills."
 readme = "README.md"
 authors = [
-    { name = "Nathan Moore", email = "nathan.moore@nrel.gov" },
+    { name = "Nathan Moore", email = "nate.moore@pearlscore.com" },
     { name = "Benjamin Park", email = "benjamin.park@nrel.gov" },
     { name = "Scott Horowitz", email = "scott.horowitz@nrel.gov" },
-    { name = "Noel Merket", email = "noel.merket@pearlcertification.com" },
+    { name = "Noel Merket", email = "noel.merket@pearlscore.com" },
 ]
 requires-python = ">=3.12, < 3.14"
 dependencies = [
