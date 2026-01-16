@@ -614,14 +614,14 @@
                   <SystemIdentifier id='air64_ducts0'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>conditioned space</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <FractionDuctArea>1.0</FractionDuctArea>
                 </Ducts>
                 <Ducts>
                   <SystemIdentifier id='air64_ducts1'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>0.0</DuctInsulationRValue>
-                  <DuctLocation>conditioned space</DuctLocation>
+                  <DuctLocation>attic - unvented</DuctLocation>
                   <FractionDuctArea>1.0</FractionDuctArea>
                 </Ducts>
                 <NumberofReturnRegisters>5</NumberofReturnRegisters>
