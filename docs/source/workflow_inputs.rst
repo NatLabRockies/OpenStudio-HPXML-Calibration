@@ -191,7 +191,7 @@ For simple utility rate structures, inputs can be entered using a fixed charge a
   ================================  ========  =======  ===========  ========  ========  ====================
 
   .. [#] If running :ref:`bldg_type_whole_mf_buildings`, the fixed charge will apply to every dwelling unit in the building.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
+  .. [#] If MarginalRate not provided, it defaults to state-level value based on 2023 EIA SEDS data, available at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
 
 **Detailed**
 
@@ -227,7 +227,7 @@ For each scenario, fuel rates can be optionally entered as an ``/HPXML/SoftwareI
   .. [#] FuelType choices are "natural gas", "propane", "fuel oil", "coal", "wood", and "wood pellets".
   .. [#] FixedCharge defaults to $12/month for natural gas and $0/month for other fuels.
   .. [#] MarginalRate units are $/therm for natural gas, $/gallon for propane and fuel oil, and $/kBtu for other fuels.
-  .. [#] If MarginalRate not provided, defaults to state, regional, or national average based on EIA SEDS data that can be found at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
+  .. [#] If MarginalRate not provided, it defaults to state-level value based on 2023 EIA SEDS data, available at ``ReportUtilityBills/resources/simple_rates/pr_all_update.csv``.
 
 PV Compensation
 ~~~~~~~~~~~~~~~
@@ -2888,9 +2888,10 @@ Each air-to-air heat pump is entered as a ``/HPXML/Building/BuildingDetails/Syst
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET HERS Addendum 82.
-  .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
-  .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
-         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
+  .. [#] PanHeaterControlType choices are "continuous", "heat pump mode", or "defrost mode".
+  .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F and above the minimum compressor operating temperature.
+         If PanHeaterControlType is "heat pump mode", the pan heater will operate anytime the outdoor temperature is below 32F and the heat pump is operating.
+         If PanHeaterControlType is "defrost mode", the pan heater will operate anytime the outdoor temperature is below 32F and the heat pump is operating in defrost mode.
   .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated", otherwise false.
   .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to offset reduced heating capacity during defrost when its capacity is sufficient.
   .. [#] EquipmentType choices are "split system", "packaged system", "small duct high velocity system", or "space constrained system".
@@ -2983,9 +2984,10 @@ Each ``HeatPump`` should represent a single outdoor unit, whether connected to o
          A non-zero charge defect should typically only be applied for systems that are charged on site, not for systems that have pre-charged line sets.
          See `ANSI/RESNET/ACCA 310-2020 <https://codes.iccsafe.org/content/ICC3102020P1>`_ for more information.
   .. [#] If CrankcaseHeaterPowerWatts not provided, defaults to 10 W per ton of rated cooling capacity per RESNET HERS Addendum 82.
-  .. [#] PanHeaterControlType choices are "continuous" or "defrost mode".
-  .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F.
-         If PanHeaterControlType is "defrost mode", the pan heater will only operate when the heat pump is in defrost mode and the outdoor temperature is below 32F.
+  .. [#] PanHeaterControlType choices are "continuous", "heat pump mode", or "defrost mode".
+  .. [#] If PanHeaterControlType is "continuous", the pan heater will operate anytime the outdoor temperature is below 32F and above the minimum compressor operating temperature.
+         If PanHeaterControlType is "heat pump mode", the pan heater will operate anytime the outdoor temperature is below 32F and the heat pump is operating.
+         If PanHeaterControlType is "defrost mode", the pan heater will operate anytime the outdoor temperature is below 32F and the heat pump is in defrost mode.
   .. [#] If BackupHeatingActiveDuringDefrost not provided, defaults to true if BackupType="integrated" and there is an attached distribution system, otherwise false.
   .. [#] If BackupHeatingActiveDuringDefrost is "true", backup heating system is assumed to offset reduced heating capacity during defrost when its capacity is sufficient.
 
@@ -4228,6 +4230,7 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   ``HeatingCapacity``                                  double            Btu/hr         > 0                     No        See [#]_        Heating output capacity
   ``BackupHeatingCapacity``                            double            Btu/hr         >= 0                    No        15355 (4.5 kW)  Heating capacity of the electric resistance backup
   ``UniformEnergyFactor`` or ``EnergyFactor``          double            frac           > 1, <= 5               Yes                       EnergyGuide label rated efficiency
+  ``HPWHDucting/ExhaustAirTermination``                string                           See [#]_                No        <none>          The location where HPWH exhaust air is ducted to
   ``HPWHOperatingMode``                                string                           See [#]_                No        hybrid/auto     Operating mode [#]_
   ``UsageBin`` or ``FirstHourRating``                  string or double  str or gal/hr  See [#]_ or > 0         No        See [#]_        EnergyGuide label usage bin/first hour rating
   ``WaterHeaterInsulation/Jacket/JacketRValue``        double            F-ft2-hr/Btu   >= 0                    No        0               R-value of additional tank insulation wrap
@@ -4256,6 +4259,8 @@ Each heat pump water heater is entered as a ``/HPXML/Building/BuildingDetails/Sy
   .. [#] FractionDHWLoadServed represents only the fraction of the hot water load associated with the hot water **fixtures**.
          Additional hot water load from clothes washers/dishwashers will be automatically assigned to the appropriate water heater(s).
   .. [#] If HeatingCapacity not provided, defaults to 1706 Btu/hr (0.5 kW) multiplied by the heat pump COP.
+  .. [#] OpenStudio-HPXML currently only supports ExhaustAirTermination="outside" for heat pump water heaters located in conditioned space.
+         Any other combination of ExhaustAirTermination value and water heater location will be ignored w/ a warning.
   .. [#] HPWHOperatingMode choices are "hybrid/auto" or "heat pump only".
   .. [#] The heat pump water heater operating mode can alternatively be defined using :ref:`schedules_detailed`.
   .. [#] UsageBin choices are "very small", "low", "medium", or "high".
