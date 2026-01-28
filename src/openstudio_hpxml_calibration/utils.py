@@ -212,7 +212,7 @@ def plot_absolute_error_series(logbook, output_filepath, filename):
 
 
 def get_tmy3_weather():
-    """Download TMY3 weather files from NREL
+    """Download TMY3 weather files
 
     Parameters
     ----------
