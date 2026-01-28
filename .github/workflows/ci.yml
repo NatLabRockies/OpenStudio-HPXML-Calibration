@@ -45,7 +45,7 @@ jobs:
       - name: Install OpenStudio on Linux
         if: runner.os == 'Linux'
         run: |
-          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb https://github.com/NatLabRockies/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
           sudo dpkg -i OpenStudio.deb
           rm OpenStudio.deb
 
@@ -55,7 +55,7 @@ jobs:
         run: |
           # Download the tarball in the runner temp directory
           $DownloadPath = Join-Path $env:RUNNER_TEMP "Windows.tar.gz"
-          Invoke-WebRequest -OutFile $DownloadPath -URI "https://github.com/NREL/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
+          Invoke-WebRequest -OutFile $DownloadPath -URI "https://github.com/NatLabRockies/OpenStudio/releases/download/v${env:OS_VERSION}/OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows.tar.gz"
 
           # Extract the tarball in the runner temp directory
           $ExtractPath = Join-Path $env:RUNNER_TEMP "OpenStudio-${env:OS_VERSION}+${env:OS_SHA}-Windows"
@@ -108,7 +108,7 @@ jobs:
 
       - name: Install OpenStudio on Linux
         run: |
-          wget -q -O OpenStudio.deb https://github.com/NREL/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
+          wget -q -O OpenStudio.deb https://github.com/NatLabRockies/OpenStudio/releases/download/v${OS_VERSION}/OpenStudio-${OS_VERSION}+${OS_SHA}-Ubuntu-24.04-x86_64.deb
           sudo dpkg -i OpenStudio.deb
           rm OpenStudio.deb
 

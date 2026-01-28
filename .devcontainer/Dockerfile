@@ -15,7 +15,7 @@ RUN apt-get update \
 COPY --from=uv --chown=vscode: /uv /uvx /bin/
 
 # Install OpenStudio
-RUN wget -q "https://github.com/NREL/OpenStudio/releases/download/v3.9.0/OpenStudio-3.9.0+c77fbb9569-Ubuntu-22.04-arm64.deb" -O OpenStudio.deb \
+RUN wget -q "https://github.com/NatLabRockies/OpenStudio/releases/download/v3.9.0/OpenStudio-3.9.0+c77fbb9569-Ubuntu-22.04-arm64.deb" -O OpenStudio.deb \
     && dpkg -i OpenStudio.deb \
     && rm OpenStudio.deb # Clean up the .deb file
 

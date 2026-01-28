@@ -1,7 +1,7 @@
-# insert your copyright here
+# frozen_string_literal: true
 
 # see the URL below for information on how to write OpenStudio measures
-# http://nrel.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
+# http://natlabrockies.github.io/OpenStudio-user-documentation/reference/measure_writing_guide/
 
 require 'logger'
 require 'oga'
@@ -216,13 +216,10 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     end
     hpxml_bldg.hvac_controls.each do |hvac_control|
       if hvac_control.heating_setpoint_temp
-        # https://github.com/NREL/OpenStudio-HPXML-Calibration/blob/main/src/OpenStudio-HPXML/HPXMLtoOpenStudio/resources/hpxml.rb#L7581-L7603
         hvac_control.heating_setpoint_temp += args[:heating_setpoint_offset]
         if hvac_control.heating_setback_temp
           hvac_control.heating_setback_temp += args[:heating_setpoint_offset]
-          # puts "New heating setback: #{hvac_control.heating_setback_temp}"
         end
-        # puts "New heating setpoint: #{hvac_control.heating_setpoint_temp}"
       end
       if hvac_control.weekday_heating_setpoints
         # Assumes if weekday_heating_setpoints is present, weekend_heating_setpoints is also present
@@ -235,8 +232,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
         # Turn back into string
         hvac_control.weekday_heating_setpoints = processed_weekday_numbers.join(", ")
         hvac_control.weekend_heating_setpoints = processed_weekend_numbers.join(", ")
-        # puts "New weekday heating setpoints: #{hvac_control.weekday_heating_setpoints}"
-        # puts "New weekend heating setpoints: #{hvac_control.weekend_heating_setpoints}"
       end
     end
   end
@@ -251,9 +246,7 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
         hvac_control.cooling_setpoint_temp += args[:cooling_setpoint_offset]
         if hvac_control.cooling_setup_temp
           hvac_control.cooling_setup_temp += args[:cooling_setpoint_offset]
-          # puts "New cooling setup: #{hvac_control.cooling_setup_temp}"
         end
-        # puts "New cooling setpoint: #{hvac_control.cooling_setpoint_temp}"
       end
       if hvac_control.weekday_cooling_setpoints
         # Assumes if weekday_cooling_setpoints is present, weekend_cooling_setpoints is also present
@@ -266,8 +259,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
         # Turn back into string
         hvac_control.weekday_cooling_setpoints = processed_weekday_numbers.join(", ")
         hvac_control.weekend_cooling_setpoints = processed_weekend_numbers.join(", ")
-        # puts "New weekday cooling setpoints: #{hvac_control.weekday_cooling_setpoints}"
-        # puts "New weekend cooling setpoints: #{hvac_control.weekend_cooling_setpoints}"
       end
     end
   end
@@ -283,12 +274,10 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       if air_infiltration_measurement.air_leakage
         new_infiltration = air_infiltration_measurement.air_leakage * multiplier
         air_infiltration_measurement.air_leakage = new_infiltration.round(2)
-        # puts "New infiltration 1: #{air_infiltration_measurement.air_leakage}"
       end
       if air_infiltration_measurement.effective_leakage_area
         new_infiltration = air_infiltration_measurement.effective_leakage_area * multiplier
         air_infiltration_measurement.effective_leakage_area = new_infiltration.round(1)
-        # puts "New infiltration 2: #{air_infiltration_measurement.effective_leakage_area}"
       end
       if air_infiltration_measurement.leakiness_description
         runner.registerWarning('Automatic modification of air infiltration leakiness description is not supported.')
@@ -306,29 +295,24 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       if heating_system.heating_efficiency_afue
         new_afue = [heating_system.heating_efficiency_afue * multiplier, 1.0].min
         heating_system.heating_efficiency_afue = new_afue.round(2)
-        # puts "New AFUE: #{heating_system.heating_efficiency_afue}"
       end
       if heating_system.heating_efficiency_percent
         new_heating_efficiency = [heating_system.heating_efficiency_percent * multiplier, 1.0].min
         heating_system.heating_efficiency_percent = new_heating_efficiency.round(2)
-        # puts "New heating percent efficiency: #{heating_system.heating_efficiency_percent}"
       end
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       if heat_pump.heating_efficiency_hspf
         new_hspf = heat_pump.heating_efficiency_hspf * multiplier
         heat_pump.heating_efficiency_hspf = new_hspf.round(2)
-        # puts "New HSPF: #{heat_pump.heating_efficiency_hspf}"
       end
       if heat_pump.heating_efficiency_hspf2
         new_hspf2 = heat_pump.heating_efficiency_hspf2 * multiplier
         heat_pump.heating_efficiency_hspf2 = new_hspf2.round(2)
-        # puts "New HSPF2: #{heat_pump.heating_efficiency_hspf2}"
       end
       if heat_pump.heating_efficiency_cop
         new_cop = heat_pump.heating_efficiency_cop * multiplier
         heat_pump.heating_efficiency_cop = new_cop.round(2)
-        # puts "New COP: #{heat_pump.heating_efficiency_cop}"
       end
     end
   end
@@ -343,44 +327,36 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       if cooling_system.cooling_efficiency_seer
         new_seer = cooling_system.cooling_efficiency_seer * multiplier
         cooling_system.cooling_efficiency_seer = new_seer.round(2)
-        # puts "New SEER: #{cooling_system.cooling_efficiency_seer}"
       end
       if cooling_system.cooling_efficiency_seer2
         new_seer2 = cooling_system.cooling_efficiency_seer2 * multiplier
         cooling_system.cooling_efficiency_seer2 = new_seer2.round(2)
-        # puts "New SEER2: #{cooling_system.cooling_efficiency_seer2}"
       end
       if cooling_system.cooling_efficiency_eer
         new_eer = cooling_system.cooling_efficiency_eer * multiplier
         cooling_system.cooling_efficiency_eer = new_eer.round(2)
-        # puts "New EER: #{cooling_system.cooling_efficiency_eer}"
       end
       if cooling_system.cooling_efficiency_ceer
         new_ceer = cooling_system.cooling_efficiency_ceer * multiplier
         cooling_system.cooling_efficiency_ceer = new_ceer.round(2)
-        # puts "New CEER: #{cooling_system.cooling_efficiency_ceer}"
       end
     end
     hpxml_bldg.heat_pumps.each do |heat_pump|
       if heat_pump.cooling_efficiency_seer
         new_seer = heat_pump.cooling_efficiency_seer * multiplier
         heat_pump.cooling_efficiency_seer = new_seer.round(2)
-        # puts "New heat pump SEER: #{heat_pump.cooling_efficiency_seer}"
       end
       if heat_pump.cooling_efficiency_seer2
         new_seer2 = heat_pump.cooling_efficiency_seer2 * multiplier
         heat_pump.cooling_efficiency_seer2 = new_seer2.round(2)
-        # puts "New heat pump SEER2: #{heat_pump.cooling_efficiency_seer2}"
       end
       if heat_pump.cooling_efficiency_eer
         new_eer = heat_pump.cooling_efficiency_eer * multiplier
         heat_pump.cooling_efficiency_eer = new_eer.round(2)
-        # puts "New heat pump EER: #{heat_pump.cooling_efficiency_eer}"
       end
       if heat_pump.cooling_efficiency_ceer
         new_ceer = heat_pump.cooling_efficiency_ceer * multiplier
         heat_pump.cooling_efficiency_ceer = new_ceer.round(2)
-        # puts "New heat pump CEER: #{heat_pump.cooling_efficiency_ceer}"
       end
     end
   end
@@ -395,14 +371,12 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       plug_load.usage_multiplier ||= 1.0
       new_multiplier = plug_load.usage_multiplier * multiplier
       plug_load.usage_multiplier = new_multiplier.round(2)
-      # puts "New plug load multiplier: #{plug_load.usage_multiplier}"
     end
     # FuelLoads Pools PermanentSpas
     hpxml_bldg.fuel_loads.each do |fuel_load|
       fuel_load.usage_multiplier ||= 1.0
       new_multiplier = fuel_load.usage_multiplier * multiplier
       fuel_load.usage_multiplier = new_multiplier.round(2)
-      # puts "New fuel load multiplier: #{fuel_load.usage_multiplier}"
     end
     hpxml_bldg.pools.each do |pool|
       next if pool.type == 'none'
@@ -412,8 +386,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       new_heater_multiplier = pool.heater_usage_multiplier * multiplier
       pool.pump_usage_multiplier = new_pump_multiplier.round(2)
       pool.heater_usage_multiplier = new_heater_multiplier.round(2)
-      # puts "New pool pump usage multiplier: #{pool.pump_usage_multiplier}"
-      # puts "New pool heater usage multiplier: #{pool.heater_usage_multiplier}"
     end
     hpxml_bldg.permanent_spas.each do |permanent_spa|
       next if permanent_spa.type == 'none'
@@ -423,8 +395,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       new_heater_multiplier = permanent_spa.heater_usage_multiplier * multiplier
       permanent_spa.pump_usage_multiplier = new_pump_multiplier.round(2)
       permanent_spa.heater_usage_multiplier = new_heater_multiplier.round(2)
-      # puts "New permanent_spa pump usage multiplier: #{permanent_spa.pump_usage_multiplier}"
-      # puts "New permanent_spa heater usage multiplier: #{permanent_spa.heater_usage_multiplier}"
     end
   end
 
@@ -436,10 +406,8 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     multiplier = args[:roof_r_value_multiplier]
     hpxml_bldg.roofs.each do |roof|
       if roof.insulation_assembly_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{roof.insulation_id} R-value: #{roof.insulation_assembly_r_value}"
         new_r_value = roof.insulation_assembly_r_value * multiplier
         roof.insulation_assembly_r_value = new_r_value.round(1)
-        # puts "New #{roof.insulation_id} R-value: #{roof.insulation_assembly_r_value}"
       end
     end
   end
@@ -454,10 +422,8 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       # Check if this floor surface is a ceiling
       next unless floor.is_ceiling
       if floor.insulation_assembly_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{floor.insulation_id} R-value: #{floor.insulation_assembly_r_value}"
         new_r_value = floor.insulation_assembly_r_value * multiplier
         floor.insulation_assembly_r_value = new_r_value.round(1)
-        # puts "New #{floor.insulation_id} R-value: #{floor.insulation_assembly_r_value}"
       end
     end
   end
@@ -472,10 +438,8 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       # Check if this floor surface is a ceiling
       next if floor.is_ceiling
       if floor.insulation_assembly_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{floor.insulation_id} R-value: #{floor.insulation_assembly_r_value}"
         new_r_value = floor.insulation_assembly_r_value * multiplier
         floor.insulation_assembly_r_value = new_r_value.round(1)
-        # puts "New #{floor.insulation_id} R-value: #{floor.insulation_assembly_r_value}"
       end
     end
   end
@@ -488,10 +452,8 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     multiplier = args[:above_ground_walls_r_value_multiplier]
     (hpxml_bldg.rim_joists + hpxml_bldg.walls).each do |surface|
       if surface.insulation_assembly_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{surface.insulation_id} R-value: #{surface.insulation_assembly_r_value}"
         new_r_value = surface.insulation_assembly_r_value * multiplier
         surface.insulation_assembly_r_value = new_r_value.round(1)
-        # puts "New #{surface.insulation_id} R-value: #{surface.insulation_assembly_r_value}"
       end
     end
   end
@@ -504,22 +466,16 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     multiplier = args[:below_ground_walls_r_value_multiplier]
     hpxml_bldg.foundation_walls.each do |foundation_wall|
       if foundation_wall.insulation_exterior_r_value && foundation_wall.insulation_exterior_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{foundation_wall.insulation_id} R-value: #{foundation_wall.insulation_exterior_r_value}"
         new_r_value = foundation_wall.insulation_exterior_r_value * multiplier
         foundation_wall.insulation_exterior_r_value = new_r_value.round(1)
-        # puts "New #{foundation_wall.insulation_id} R-value: #{foundation_wall.insulation_exterior_r_value}"
       end
       if foundation_wall.insulation_interior_r_value && foundation_wall.insulation_interior_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{foundation_wall.insulation_id} R-value: #{foundation_wall.insulation_interior_r_value}"
         new_r_value = foundation_wall.insulation_interior_r_value * multiplier
         foundation_wall.insulation_interior_r_value = new_r_value.round(1)
-        # puts "New #{foundation_wall.insulation_id} R-value: #{foundation_wall.insulation_interior_r_value}"
       end
       if foundation_wall.insulation_assembly_r_value && foundation_wall.insulation_assembly_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{foundation_wall.insulation_id} R-value: #{foundation_wall.insulation_assembly_r_value}"
         new_r_value = foundation_wall.insulation_assembly_r_value * multiplier
         foundation_wall.insulation_assembly_r_value = new_r_value.round(1)
-        # puts "New #{foundation_wall.insulation_id} R-value: #{foundation_wall.insulation_assembly_r_value}"
       end
     end
   end
@@ -532,28 +488,20 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     multiplier = args[:slab_r_value_multiplier]
     hpxml_bldg.slabs.each do |slab|
       if slab.under_slab_insulation_r_value && slab.under_slab_insulation_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{slab.under_slab_insulation_id} R-value: #{slab.under_slab_insulation_r_value}"
         new_r_value = slab.under_slab_insulation_r_value * multiplier
         slab.under_slab_insulation_r_value = new_r_value.round(1)
-        # puts "New #{slab.under_slab_insulation_id} R-value: #{slab.under_slab_insulation_r_value}"
       end
       if slab.perimeter_insulation_r_value && slab.perimeter_insulation_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{slab.perimeter_insulation_id} R-value: #{slab.perimeter_insulation_r_value}"
         new_r_value = slab.perimeter_insulation_r_value * multiplier
         slab.perimeter_insulation_r_value = new_r_value.round(1)
-        # puts "New #{slab.perimeter_insulation_id} R-value: #{slab.perimeter_insulation_r_value}"
       end
       if slab.exterior_horizontal_insulation_r_value && slab.exterior_horizontal_insulation_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{slab.exterior_horizontal_insulation_id} R-value: #{slab.exterior_horizontal_insulation_r_value}"
         new_r_value = slab.exterior_horizontal_insulation_r_value * multiplier
         slab.exterior_horizontal_insulation_r_value = new_r_value.round(1)
-        # puts "New #{slab.exterior_horizontal_insulation_id} R-value: #{slab.exterior_horizontal_insulation_r_value}"
       end
       if slab.gap_insulation_r_value && slab.gap_insulation_r_value > @@estimated_uninsulated_r_value
-        # puts "Original #{slab.id} R-value: #{slab.gap_insulation_r_value}"
         new_r_value = slab.gap_insulation_r_value * multiplier
         slab.gap_insulation_r_value = new_r_value.round(1)
-        # puts "New #{slab.id} R-value: #{slab.gap_insulation_r_value}"
       end
     end
   end
@@ -567,7 +515,7 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.water_heating_systems.each do |water_heating_system|
       if water_heating_system.energy_factor
         if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-          # Apply HPXML bounds https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#heat-pump
+          # Apply HPXML bounds
           new_ef = [[water_heating_system.energy_factor * multiplier, 1.01].max, 5.0].min
         else
           new_ef = [water_heating_system.energy_factor * multiplier, 0.99].min
@@ -576,11 +524,10 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
           water_heating_system.recovery_efficiency = nil
         end
         water_heating_system.energy_factor = new_ef.round(2)
-        # puts "New EF: #{water_heating_system.energy_factor}"
       end
       if water_heating_system.uniform_energy_factor
         if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeHeatPump
-          # Apply HPXML bounds https://openstudio-hpxml.readthedocs.io/en/latest/workflow_inputs.html#heat-pump
+          # Apply HPXML bounds
           new_uef = [[water_heating_system.uniform_energy_factor * multiplier, 1.01].max, 5.0].min
         else
           new_uef = [water_heating_system.uniform_energy_factor * multiplier, 0.99].min
@@ -589,7 +536,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
           water_heating_system.recovery_efficiency = nil
         end
         water_heating_system.uniform_energy_factor = new_uef.round(2)
-        # puts "New UEF: #{water_heating_system.uniform_energy_factor}"
       end
     end
   end
@@ -603,7 +549,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.water_heating.water_fixtures_usage_multiplier ||= 1.0
     new_multiplier = hpxml_bldg.water_heating.water_fixtures_usage_multiplier * multiplier
     hpxml_bldg.water_heating.water_fixtures_usage_multiplier = new_multiplier.round(2)
-    # puts "New water fixture usage multiplier: #{hpxml_bldg.water_heating.water_fixtures_usage_multiplier}"
   end
 
   def modify_lighting_loads(hpxml_bldg, runner, args)
@@ -615,7 +560,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
     hpxml_bldg.lighting.interior_usage_multiplier ||= 1.0
     new_multiplier = hpxml_bldg.lighting.interior_usage_multiplier * multiplier
     hpxml_bldg.lighting.interior_usage_multiplier = new_multiplier.round(2)
-    # puts "New lighting load multiplier: #{hpxml_bldg.lighting.interior_usage_multiplier}"
   end
 
   def modify_window_u_factor(hpxml_bldg, runner, args)
@@ -628,7 +572,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       if window.ufactor
         new_uf = window.ufactor * multiplier
         window.ufactor = new_uf.round(2)
-        # puts "New U-Factor: #{window.ufactor}"
       end
     end
   end
@@ -643,7 +586,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
       if window.shgc
         new_shgc = [window.shgc * multiplier, 0.99].min
         window.shgc = new_shgc.round(2)
-        # puts "New SHGC: #{window.shgc}"
       end
     end
   end
@@ -669,7 +611,6 @@ class ModifyXML < OpenStudio::Measure::ModelMeasure
         appliance.usage_multiplier ||= 1.0
         new_appliance_usage_multiplier = appliance.usage_multiplier * multiplier
         appliance.usage_multiplier = new_appliance_usage_multiplier.round(2)
-        # puts "New #{appliance_name} usage multiplier: #{appliance.usage_multiplier}"
       end
     end
   end
