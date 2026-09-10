@@ -297,7 +297,7 @@ class Calibrate:
                 fuel_unit_type = f"{fuel_unit_type}_propane"
             elif fuel_unit_type == "therms":
                 fuel_unit_type = "therm"
-        measured_consumption = convert_units(measured_consumption, str(fuel_unit_type), "mBtu")
+        measured_consumption = convert_units(measured_consumption, str(fuel_unit_type), "mbtu")
 
         modeled_baseload = model_results[fuel_type].get("baseload", 0)
         modeled_heating = model_results[fuel_type].get("heating", 0)
@@ -308,12 +308,19 @@ class Calibrate:
         heating_fraction = modeled_heating / total_modeled_usage
         cooling_fraction = modeled_cooling / total_modeled_usage
 
+        tmy_hdd = total_period_tmy_dd[fuel_type]["HDD65F"]
+        tmy_cdd = total_period_tmy_dd[fuel_type]["CDD65F"]
+
         baseload = baseload_fraction * (num_days / 365)
-        heating = heating_fraction * (
-            total_period_actual_dd[fuel_type]["HDD65F"] / total_period_tmy_dd[fuel_type]["HDD65F"]
+        heating = (
+            heating_fraction * (total_period_actual_dd[fuel_type]["HDD65F"] / tmy_hdd)
+            if tmy_hdd
+            else 0
         )
-        cooling = cooling_fraction * (
-            total_period_actual_dd[fuel_type]["CDD65F"] / total_period_tmy_dd[fuel_type]["CDD65F"]
+        cooling = (
+            cooling_fraction * (total_period_actual_dd[fuel_type]["CDD65F"] / tmy_cdd)
+            if tmy_cdd
+            else 0
         )
 
         annual_delivered_fuel_usage = measured_consumption / (baseload + heating + cooling)
@@ -541,6 +548,7 @@ class Calibrate:
         normalized_consumption_per_bill = self.get_normalized_consumption_per_bill()
 
         def evaluate(individual):
+            temp_output_dir = None
             try:
                 (
                     misc_load_multiplier,
@@ -661,7 +669,7 @@ class Calibrate:
 
             except Exception as e:
                 logger.error(f"Error evaluating individual {individual}: {e}")
-                return (float("inf"),), {}, None
+                return (float("inf"),), {}, temp_output_dir, None
 
         def abs_error_within_threshold(
             fuel_type: str, abs_error: float, elec_threshold: float, fuel_threshold: float
@@ -1113,7 +1121,8 @@ class Calibrate:
                     ind.comparison = comp
                     ind.temp_output_dir = temp_dir
                     ind.sim_results = sim_results
-                    all_temp_dirs.add(temp_dir)
+                    if temp_dir is not None:
+                        all_temp_dirs.add(temp_dir)
 
                 # Select next generation (excluding elites), then add elites
                 if invalid_ind:
