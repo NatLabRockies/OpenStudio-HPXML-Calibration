@@ -109,6 +109,9 @@ def get_bills_from_hpxml(
     return bills_by_fuel_type, bill_units, local_standard_tz
 
 
+DEFAULT_MAX_STATION_DISTANCE_METERS = 200_000  # caps eeweather's nationwide station search
+
+
 def join_bills_weather(bills_orig: pd.DataFrame, lat: float, lon: float, **kw) -> pd.DataFrame:
     """Join the bills dataframe with an average daily temperature
 
@@ -123,13 +126,21 @@ def join_bills_weather(bills_orig: pd.DataFrame, lat: float, lon: float, **kw) -
     """
     start_date = bills_orig["start_date"].min().tz_convert("UTC")
     end_date = bills_orig["end_date"].max().tz_convert("UTC")
-    rank_stations_kw = {"minimum_quality": "medium"}
+    rank_stations_kw = {
+        "minimum_quality": "medium",
+        "max_distance_meters": DEFAULT_MAX_STATION_DISTANCE_METERS,
+    }
     rank_stations_kw.update(kw)
     with warnings.catch_warnings():
         ranked_stations = eeweather.rank_stations(lat, lon, **rank_stations_kw)
         isd_station, _ = eeweather.select_station(
             ranked_stations, coverage_range=(start_date, end_date)
         )
+        if isd_station is None:
+            raise ValueError(
+                f"No weather station within {rank_stations_kw['max_distance_meters']} m of "
+                f"({lat}, {lon}) met the minimum quality/coverage requirements."
+            )
         tempC, _ = isd_station.load_isd_hourly_temp_data(start_date, end_date)
     tempC = tempC.tz_convert(bills_orig["start_date"].dt.tz)
     tempF = convert_units(tempC, "c", "f")

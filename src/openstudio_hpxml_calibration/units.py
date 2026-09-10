@@ -26,6 +26,7 @@ SCALARS = {
     ("kbtu", "kwh"): 293.0710701722222 / 1000.0,
     ("mbtu", "therm"): 10.0,
     ("mbtu", "wh"): 293071.0701722222,
+    ("mbtu", "btu"): 1000000.0,
     # ccf conversions sourced from EIA FAQ: https://www.eia.gov/tools/faqs/faq.php?id=45&t=8
     ("ccf", "btu"): 103800,
     ("ccf", "kbtu"): 103.8,
@@ -168,6 +169,9 @@ def convert_units(
     from_d = from_.lower()
     to_d = to_.lower()
 
+    if from_d == to_d:
+        return x
+
     # Try forward
     key = (from_d, to_d)
     scalar = SCALARS.get(key)
@@ -239,6 +243,11 @@ def convert_hpxml_energy_units(
                 from_val = gal_energy_val
             if to_ == EnergyUnitType.GAL:
                 to_val = gal_energy_val
+            if from_ == EnergyUnitType.MBTU:
+                from_val = hpxml_fuel_type_mapping[from_]
+            if to_ == EnergyUnitType.MBTU:
+                to_val = hpxml_fuel_type_mapping[to_]
+
             return convert_units(x, from_val, to_val)
         else:
             raise ex
